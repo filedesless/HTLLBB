@@ -1,0 +1,19 @@
+﻿@model DeleteAccountViewModel
+@{
+    ViewData["Title"] = "Delete account";
+    ViewData.AddActivePage(ManageNavPages.DeleteAccount);
+}
+
+<h4>@ViewData["Title"]</h4>
+@Html.Partial("_StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <button type="submit" class="btn btn-default">Yes. Delete my account</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
