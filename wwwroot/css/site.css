@@ -1,6 +1,12 @@
 ﻿body {
     padding-top: 50px;
     padding-bottom: 20px;
+    background: rgb(21, 21, 21) url('../images/bg_bf.png');
+    color: lightslategray;
+}
+
+input {
+    background-color: lightgrey !important;
 }
 
 /* Wrapping element */

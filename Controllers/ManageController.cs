@@ -88,6 +88,10 @@ namespace HTLLBB.Controllers
                 if (!setEmailResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting email for user with ID '{user.Id}'.");
+                } else 
+                {
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
                 }
             }
 
