@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.1">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.1" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet">
@@ -23,5 +25,14 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools">
       <Version>2.0.1</Version>
     </DotNetCliToolReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Data\Migrations\20180101071435_ForumBase.cs" />
+    <Compile Remove="Data\Migrations\20180101071435_ForumBase.Designer.cs" />
+    <Compile Remove="Data\ForumContext.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="app" />
+    <None Remove="app.db" />
   </ItemGroup>
 </Project>
