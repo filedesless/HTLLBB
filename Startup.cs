@@ -41,6 +41,8 @@ namespace HTLLBB
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
 
+            services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
+
             services.AddMvc();
         }
 
@@ -51,12 +53,10 @@ namespace HTLLBB
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
-                Console.WriteLine("DEv");
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                Console.WriteLine($"Non dev: {env.EnvironmentName}");
             }
 
             app.UseStaticFiles();
