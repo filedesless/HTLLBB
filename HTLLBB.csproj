@@ -14,6 +14,7 @@
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.1" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.Design" Version="1.1.2" />
+    <PackageReference Include="BuildBundlerMinifier" Version="2.6.362" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet">
@@ -34,5 +35,8 @@
   <ItemGroup>
     <None Remove="app" />
     <None Remove="app.db" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\ForumsViewModels\" />
   </ItemGroup>
 </Project>

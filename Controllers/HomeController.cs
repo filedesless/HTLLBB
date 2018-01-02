@@ -17,7 +17,7 @@ namespace HTLLBB.Controllers
 
         public IActionResult About()
         {
-            ViewData["Message"] = "Your application description page.";
+            ViewData["Message"] = "High Tech Low Life.";
 
             return View();
         }

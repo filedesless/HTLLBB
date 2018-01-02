@@ -7,23 +7,34 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HTLLBB.Data;
 using HTLLBB.Models;
+using HTLLBB.Models.ForumsViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace HTLLBB.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ForumsController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ForumsController(ApplicationDbContext context)
+        public ForumsController(ApplicationDbContext context, 
+                                UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Forums
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Categories.ToListAsync());
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            IEnumerable<Category> categories = await _context.Categories.Include(c => c.Forums).ToListAsync();
+
+            return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
         }
 
         // GET: Forums/Details/5
@@ -54,7 +65,6 @@ namespace HTLLBB.Controllers
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [Authorize(Roles="Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name")] Category category)
         {

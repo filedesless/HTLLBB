@@ -1,35 +1,33 @@
-@model IEnumerable<HTLLBB.Models.Category>
+@model HTLLBB.Models.ForumsViewModels.IndexViewModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Forums";
 }
 
-<h2>Index</h2>
+<div class="w3-container w3-grey">
+    <h2>@ViewData["Title"]</h2>
+</div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-                <th>
-                    @Html.DisplayNameFor(model => model.Name)
-                </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
-            </td>
-        </tr>
+<hr />
+
+@foreach (var category in Model.Categories) {
+    <div class="w3-border w3-margin w3-dark-grey">
+        <div class="w3-blue-grey w3-bar">
+            <a class="w3-bar-item">@category.Name</a>
+            @if (Model.IsAdmin) {
+                <span class="w3-button w3-right">Add Forum</span>
+            }
+        </div>
+
+        @foreach (var forum in category.Forums) {
+            <p>forum.Name</p>
+        }
+
+    </div>
 }
-    </tbody>
-</table>
+
+@if (Model.IsAdmin) {
+    <div class="w3-center">
+        <button class="w3-button w3-circle w3-blue">+</button>
+    </div>
+}
