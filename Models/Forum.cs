@@ -6,6 +6,7 @@ namespace HTLLBB.Models
     public class Forum
     {
         public int ID { get; set; }
+        public String Name { get; set; }
         public List<Thread> Threads { get; set; }
     }
 }

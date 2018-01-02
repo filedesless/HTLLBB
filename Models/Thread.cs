@@ -6,6 +6,7 @@ namespace HTLLBB.Models
     public class Thread
     {
         public int ID { get; set; }
+        public String Title { get; set; }
         public List<Post> Posts { get; set; }
     }
 }

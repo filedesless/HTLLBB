@@ -220,6 +220,7 @@ namespace HTLLBB.Controllers
             if (ModelState.IsValid)
             {
                 var user = new ApplicationUser { UserName = model.Username, Email = model.Email };
+
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -232,6 +233,7 @@ namespace HTLLBB.Controllers
                     if ( await _signInManager.CanSignInAsync(user) )
                         await _signInManager.SignInAsync(user, isPersistent: false);
                     _logger.LogInformation("User created a new account with password.");
+
                     return View("PleaseConfirmEmail");
                 }
                 AddErrors(result);
