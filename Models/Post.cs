@@ -8,5 +8,8 @@ namespace HTLLBB.Models
         public ApplicationUser Author { get; set; }
         public String Content { get; set; }
         public DateTime CreationTime { get; set; }
+
+        public int ThreadId { get; set; }
+        public Thread Thread { get; set; }
     }
 }

@@ -4,30 +4,53 @@
     ViewData["Title"] = "Forums";
 }
 
-<div class="w3-container w3-grey">
-    <h2>@ViewData["Title"]</h2>
+<div class="w3-grey w3-bar w3-xxlarge">
+    <span class="w3-bar-item">@ViewData["Title"]</span>
+    @if (Model.IsAdmin) {
+        <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-controller="Category" asp-action="Create">
+            <span class="w3-small" style="vertical-align: middle;">Add Category</span>
+        </a>
+    }
 </div>
 
 <hr />
 
 @foreach (var category in Model.Categories) {
-    <div class="w3-border w3-margin w3-dark-grey">
+    <div class="w3-border w3-margin w3-grey">
         <div class="w3-blue-grey w3-bar">
-            <a class="w3-bar-item">@category.Name</a>
+            <a class="w3-bar-item"><i class="glyphicon glyphicon-th-list"></i> @category.Name</a>
             @if (Model.IsAdmin) {
-                <span class="w3-button w3-right">Add Forum</span>
+                <div class="w3-right">
+                    <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Create" asp-route-id="@category.ID">
+                        <span class="w3-small"><i class="glyphicon glyphicon-plus-sign w3-text-green"></i></span>
+                    </a>
+                    <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Category" asp-action="Edit" asp-route-id="@category.ID">
+                        <span class="w3-small"><i class="glyphicon glyphicon-edit w3-text-yellow"></i></span>
+                    </a>
+                    <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Category" asp-action="Delete" asp-route-id="@category.ID">
+                        <span class="w3-small"><i class="glyphicon glyphicon-remove-sign w3-text-red"></i></span>
+                    </a>
+                </div>
+
             }
         </div>
 
-        @foreach (var forum in category.Forums) {
-            <p>forum.Name</p>
-        }
-
-    </div>
-}
-
-@if (Model.IsAdmin) {
-    <div class="w3-center">
-        <button class="w3-button w3-circle w3-blue">+</button>
+        <div>
+           @foreach (var forum in category.Forums) {
+                <div class="w3-bar w3-hover-pale-green">
+                    <span class="w3-bar-item"><i class="glyphicon glyphicon-chevron-right"></i> @forum.Name</span>
+                    @if (Model.IsAdmin) {
+                        <div class="w3-right">
+                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Edit" asp-route-id="@forum.ID">
+                                <span class="w3-small"><i class="glyphicon glyphicon-edit w3-text-yellow"></i></span>
+                            </a> 
+                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Delete" asp-route-id="@forum.ID">
+                                <span class="w3-small"><i class="glyphicon glyphicon-remove-sign w3-text-red"></i></span>
+                            </a>
+                        </div>
+                    }
+                </div> 
+            }
+        </div>
     </div>
 }

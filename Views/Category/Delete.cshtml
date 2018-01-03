@@ -1,13 +1,13 @@
-@model HTLLBB.Models.Forum
+@model HTLLBB.Models.Category
 
 @{
     ViewData["Title"] = "Delete";
 }
 
 <h2>Delete</h2>
-    <hr />
+<hr />
 
-<h3>Are you sure you want to delete this forum?</h3>
+<h3>Are you sure you want to delete this category?</h3>
 <div>
     <dl class="dl-horizontal">
         <dt>
@@ -21,5 +21,5 @@
     <form asp-action="Delete">
         <input type="hidden" asp-for="ID" />
         <input type="submit" value="Delete" class="btn btn-default" />
-    </form>
+        </form>
 </div>

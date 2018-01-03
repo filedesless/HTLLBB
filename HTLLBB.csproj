@@ -38,5 +38,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\ForumsViewModels\" />
+    <Folder Include="Views\Category\" />
   </ItemGroup>
 </Project>

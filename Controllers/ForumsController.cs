@@ -14,24 +14,25 @@ using Microsoft.AspNetCore.Identity;
 namespace HTLLBB.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class ForumsController : Controller
+    public class ForumsController : ApplicationController
     {
-        private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-
         public ForumsController(ApplicationDbContext context, 
-                                UserManager<ApplicationUser> userManager)
+                                UserManager<ApplicationUser> userManager, 
+                                SignInManager<ApplicationUser> signInManager) 
+            : base(context, userManager, signInManager)
         {
-            _context = context;
-            _userManager = userManager;
         }
 
         // GET: Forums
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            ApplicationUser user = await _userManager.GetUserAsync(User);
-            bool isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            bool isAdmin = false;
+            if (_signInManager.IsSignedIn(User))
+            {
+                ApplicationUser user = await _userManager.GetUserAsync(User);
+                isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            }
             IEnumerable<Category> categories = await _context.Categories.Include(c => c.Forums).ToListAsync();
 
             return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
@@ -56,9 +57,9 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums/Create
-        public IActionResult Create()
+        public IActionResult Create(int id)
         {
-            return View();
+            return View(new CreateViewModel { CatID = id });
         }
 
         // POST: Forums/Create
@@ -66,15 +67,19 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name")] Category category)
+        public async Task<IActionResult> Create(CreateViewModel model)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var cat = await _context.Categories.SingleAsync(c => c.ID == model.CatID);
+                if (cat != null) 
+                {
+                    cat.Forums.Add(new Forum { Name = model.Name });
+                    await _context.SaveChangesAsync();
+                }
+
             }
-            return View(category);
+            return RedirectToAction(nameof(Index));	
         }
 
         // GET: Forums/Edit/5
@@ -85,12 +90,12 @@ namespace HTLLBB.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
-            if (category == null)
+            var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
+            if (forum == null)
             {
                 return NotFound();
             }
-            return View(category);
+            return View(forum);
         }
 
         // POST: Forums/Edit/5
@@ -98,23 +103,24 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Forum forum)
         {
-            if (id != category.ID)
+            if (id != forum.ID)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == forum.ID);
+
+            if (await TryUpdateModelAsync(forumToUpdate, "", f => f.Name))
             {
                 try
                 {
-                    _context.Update(category);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.ID))
+                    if (!ForumExists(forum.ID))
                     {
                         return NotFound();
                     }
@@ -125,7 +131,7 @@ namespace HTLLBB.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(category);
+            return View(forum);
         }
 
         // GET: Forums/Delete/5
@@ -136,14 +142,14 @@ namespace HTLLBB.Controllers
                 return NotFound();
             }
 
-            var category = await _context.Categories
+            var forum = await _context.Forums
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if (category == null)
+            if (forum == null)
             {
                 return NotFound();
             }
 
-            return View(category);
+            return View(forum);
         }
 
         // POST: Forums/Delete/5
@@ -151,15 +157,15 @@ namespace HTLLBB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Categories.Remove(category);
+            var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
+            _context.Forums.Remove(forum);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
+        private bool ForumExists(int id)
         {
-            return _context.Categories.Any(e => e.ID == id);
+            return _context.Forums.Any(e => e.ID == id);
         }
     }
 }

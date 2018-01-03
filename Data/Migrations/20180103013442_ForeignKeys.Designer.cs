@@ -11,9 +11,10 @@ using System;
 namespace HTLLBB.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20180103013442_ForeignKeys")]
+    partial class ForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,13 +88,13 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("CategoryId");
+                    b.Property<int?>("CategoryID");
 
                     b.Property<string>("Name");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CategoryId");
+                    b.HasIndex("CategoryID");
 
                     b.ToTable("Forums");
                 });
@@ -109,13 +110,13 @@ namespace HTLLBB.Data.Migrations
 
                     b.Property<DateTime>("CreationTime");
 
-                    b.Property<int>("ThreadId");
+                    b.Property<int?>("ThreadID");
 
                     b.HasKey("ID");
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("ThreadId");
+                    b.HasIndex("ThreadID");
 
                     b.ToTable("Posts");
                 });
@@ -125,13 +126,13 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("ForumId");
+                    b.Property<int?>("ForumID");
 
                     b.Property<string>("Title");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ForumId");
+                    b.HasIndex("ForumID");
 
                     b.ToTable("Thread");
                 });
@@ -247,8 +248,7 @@ namespace HTLLBB.Data.Migrations
                 {
                     b.HasOne("HTLLBB.Models.Category", "Category")
                         .WithMany("Forums")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("CategoryID");
                 });
 
             modelBuilder.Entity("HTLLBB.Models.Post", b =>
@@ -259,16 +259,14 @@ namespace HTLLBB.Data.Migrations
 
                     b.HasOne("HTLLBB.Models.Thread", "Thread")
                         .WithMany("Posts")
-                        .HasForeignKey("ThreadId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ThreadID");
                 });
 
             modelBuilder.Entity("HTLLBB.Models.Thread", b =>
                 {
                     b.HasOne("HTLLBB.Models.Forum", "Forum")
                         .WithMany("Threads")
-                        .HasForeignKey("ForumId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ForumID");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
