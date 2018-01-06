@@ -14,11 +14,11 @@ using HTLLBB.Models.CategoryViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize(Roles="Admin")]
+    [Authorize(Roles = "Admin")]
     public class CategoryController : ApplicationController
     {
-        public CategoryController(ApplicationDbContext context, 
-                                  UserManager<ApplicationUser> userManager, 
+        public CategoryController(ApplicationDbContext context,
+                                  UserManager<ApplicationUser> userManager,
                                   SignInManager<ApplicationUser> signInManager)
             : base(context, userManager, signInManager)
         {
@@ -26,6 +26,7 @@ namespace HTLLBB.Controllers
 
         // GET: Forums
         [AllowAnonymous]
+        [Route("Forums")]
         public async Task<IActionResult> Index()
         {
             bool isAdmin = false;

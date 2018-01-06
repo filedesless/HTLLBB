@@ -1,11 +1,7 @@
 @model HTLLBB.Models.CategoryViewModels.IndexViewModel
 
-@{
-    ViewData["Title"] = "Forums";
-}
-
 <div class="w3-grey w3-bar w3-xxlarge">
-    <span class="w3-bar-item">@ViewData["Title"]</span>
+    <a class="w3-bar-item" asp-controller="Category">Forums</a>
     @if (Model.IsAdmin) {
         <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-action="Create">
             <span class="w3-small" style="vertical-align: middle;">Add Category</span>
@@ -17,8 +13,10 @@
 
 @foreach (var category in Model.Categories) {
     <div class="w3-border w3-margin w3-grey">
-        <div class="w3-blue-grey w3-bar w3-bottombar">
-            <span class="w3-bar-item w3-wide w3-serif"><i class="glyphicon glyphicon-th-list"></i> @category.Name</span>
+        <div class="w3-blue-grey w3-bar w3-bottombar w3-large">
+            <span class="w3-bar-item" style="font-weight: bold;" >
+                <i class="glyphicon glyphicon-th-list"></i> @category.Name
+            </span>
             @if (Model.IsAdmin) {
                 <div class="w3-right">
                     <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forum" asp-action="Create" asp-route-id="@category.ID">
