@@ -5,7 +5,7 @@
     color: lightslategray;
 }
 
-input {
+input, textarea {
     background-color: lightgrey !important;
 }
 

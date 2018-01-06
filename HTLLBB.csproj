@@ -31,13 +31,17 @@
     <Compile Remove="Data\Migrations\20180101071435_ForumBase.cs" />
     <Compile Remove="Data\Migrations\20180101071435_ForumBase.Designer.cs" />
     <Compile Remove="Data\ForumContext.cs" />
+    <Compile Remove="Data\Migrations\00000000000000_CreateIdentitySchema.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="app" />
     <None Remove="app.db" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Models\ForumsViewModels\" />
+    <Folder Include="Models\ForumViewModels\" />
     <Folder Include="Views\Category\" />
+    <Folder Include="Models\CategoryViewModels\" />
+    <Folder Include="Models\ThreadViewModels\" />
+    <Folder Include="Views\Thread\" />
   </ItemGroup>
 </Project>

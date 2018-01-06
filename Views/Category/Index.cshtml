@@ -1,4 +1,4 @@
-@model HTLLBB.Models.ForumsViewModels.IndexViewModel
+@model HTLLBB.Models.CategoryViewModels.IndexViewModel
 
 @{
     ViewData["Title"] = "Forums";
@@ -7,7 +7,7 @@
 <div class="w3-grey w3-bar w3-xxlarge">
     <span class="w3-bar-item">@ViewData["Title"]</span>
     @if (Model.IsAdmin) {
-        <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-controller="Category" asp-action="Create">
+        <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-action="Create">
             <span class="w3-small" style="vertical-align: middle;">Add Category</span>
         </a>
     }
@@ -17,11 +17,11 @@
 
 @foreach (var category in Model.Categories) {
     <div class="w3-border w3-margin w3-grey">
-        <div class="w3-blue-grey w3-bar">
-            <a class="w3-bar-item"><i class="glyphicon glyphicon-th-list"></i> @category.Name</a>
+        <div class="w3-blue-grey w3-bar w3-bottombar">
+            <span class="w3-bar-item w3-wide w3-serif"><i class="glyphicon glyphicon-th-list"></i> @category.Name</span>
             @if (Model.IsAdmin) {
                 <div class="w3-right">
-                    <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Create" asp-route-id="@category.ID">
+                    <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forum" asp-action="Create" asp-route-id="@category.ID">
                         <span class="w3-small"><i class="glyphicon glyphicon-plus-sign w3-text-green"></i></span>
                     </a>
                     <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Category" asp-action="Edit" asp-route-id="@category.ID">
@@ -37,14 +37,14 @@
 
         <div>
            @foreach (var forum in category.Forums) {
-                <div class="w3-bar w3-hover-pale-green">
-                    <span class="w3-bar-item"><i class="glyphicon glyphicon-chevron-right"></i> @forum.Name</span>
+                <div class="w3-bar" style="padding-left: 16px;">
+                    <a class="w3-bar-item" asp-controller="Forum" asp-route-id="@forum.ID"><i class="glyphicon glyphicon-chevron-right"></i> @forum.Name</a>
                     @if (Model.IsAdmin) {
                         <div class="w3-right">
-                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Edit" asp-route-id="@forum.ID">
+                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forum" asp-action="Edit" asp-route-id="@forum.ID">
                                 <span class="w3-small"><i class="glyphicon glyphicon-edit w3-text-yellow"></i></span>
                             </a> 
-                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forums" asp-action="Delete" asp-route-id="@forum.ID">
+                            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forum" asp-action="Delete" asp-route-id="@forum.ID">
                                 <span class="w3-small"><i class="glyphicon glyphicon-remove-sign w3-text-red"></i></span>
                             </a>
                         </div>

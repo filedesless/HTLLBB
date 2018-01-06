@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using HTLLBB.Models.CategoryViewModels;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +22,23 @@ namespace HTLLBB.Controllers
                                   SignInManager<ApplicationUser> signInManager)
             : base(context, userManager, signInManager)
         {
+        }
+
+        // GET: Forums
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
+        {
+            bool isAdmin = false;
+            if (_signInManager.IsSignedIn(User))
+            {
+                ApplicationUser user = await _userManager.GetUserAsync(User);
+                isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            }
+            IEnumerable<Category> categories = await _context.Categories
+                                                             .Include(c => c.Forums)
+                                                             .ToListAsync();
+
+            return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
         }
 
         // GET: Forums/Create
@@ -41,16 +59,13 @@ namespace HTLLBB.Controllers
                 _context.Add(category);
                 await _context.SaveChangesAsync();
             }
-            return RedirectToAction("Index", "Forums");
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Forums/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var category = await _context.Categories
                 .SingleOrDefaultAsync(m => m.ID == id);
@@ -65,21 +80,20 @@ namespace HTLLBB.Controllers
         // POST: Forums/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
+            if (id == null) return NotFound();
+
             var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Forums");
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Forums/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
             if (category == null)
@@ -119,7 +133,7 @@ namespace HTLLBB.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction("Index", "Forums");
+                return RedirectToAction(nameof(Index));
             }
             return View(category);
         }

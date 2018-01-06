@@ -61,6 +61,7 @@ namespace HTLLBB
 
             app.UseStaticFiles();
             app.UseCookiePolicy();
+            app.UseStatusCodePages();
 
             app.UseAuthentication();
 
@@ -70,8 +71,6 @@ namespace HTLLBB
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            DbInitializer.Seed(serviceProvider);
         }
     }
 }

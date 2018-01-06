@@ -1,0 +1,28 @@
+@model HTLLBB.Models.ForumViewModels.IndexViewModel
+
+@{
+    ViewData["Title"] = $"{Model.Forum.Category.Name} / {Model.Forum.Name}";
+}
+
+<div class="w3-grey w3-bar w3-xxlarge">
+    <span class="w3-bar-item">@ViewData["Title"]</span>
+    <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-controller="Thread" asp-action="Create" asp-route-id="@Model.Forum.ID">
+        <span class="w3-small" style="vertical-align: middle;">Create Thread</span>
+    </a>
+</div>
+
+<hr />
+
+@foreach (var thread in Model.Forum.Threads) {
+    <div class="w3-border w3-margin w3-grey">
+        <div class="w3-blue-grey w3-bar">
+            <div class="w3-bar-item w3-xlarge">
+                <i class="glyphicon glyphicon-comment" style="vertical-align: middle;"></i>
+            </div>
+            <div class="w3-bar-item">
+                <span style="font-weight: bold;"> @thread.Title</span> <br />
+                <span class="w3-tiny" style="font-style: italic;"> By @thread.Posts.First().Author</span>
+            </div>
+        </div>
+    </div>
+}

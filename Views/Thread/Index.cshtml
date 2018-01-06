@@ -1,0 +1,12 @@
+@model HTLLBB.Models.Thread
+
+@{
+    ViewData["Title"] = $"{Model.Forum.Category.Name} / {Model.Forum.Name} / {Model.Title}";
+}
+
+<div class="w3-grey w3-bar w3-xxlarge">
+    <span class="w3-bar-item">@ViewData["Title"]</span>
+
+</div>
+
+<hr />

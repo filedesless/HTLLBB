@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
-namespace HTLLBB.Data.Migrations
+namespace HTLLBB.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180103013442_ForeignKeys")]
-    partial class ForeignKeys
+    [Migration("20180106081409_FixedCircularDependencies")]
+    partial class FixedCircularDependencies
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -76,7 +76,8 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
@@ -88,13 +89,14 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("CategoryID");
+                    b.Property<int>("CategoryId");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CategoryID");
+                    b.HasIndex("CategoryId");
 
                     b.ToTable("Forums");
                 });
@@ -104,19 +106,21 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AuthorId");
+                    b.Property<string>("AuthorId")
+                        .IsRequired();
 
-                    b.Property<string>("Content");
+                    b.Property<string>("Content")
+                        .IsRequired();
 
                     b.Property<DateTime>("CreationTime");
 
-                    b.Property<int?>("ThreadID");
+                    b.Property<int>("ThreadId");
 
                     b.HasKey("ID");
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("ThreadID");
+                    b.HasIndex("ThreadId");
 
                     b.ToTable("Posts");
                 });
@@ -126,13 +130,14 @@ namespace HTLLBB.Data.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("ForumID");
+                    b.Property<int>("ForumId");
 
-                    b.Property<string>("Title");
+                    b.Property<string>("Title")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ForumID");
+                    b.HasIndex("ForumId");
 
                     b.ToTable("Thread");
                 });
@@ -248,25 +253,29 @@ namespace HTLLBB.Data.Migrations
                 {
                     b.HasOne("HTLLBB.Models.Category", "Category")
                         .WithMany("Forums")
-                        .HasForeignKey("CategoryID");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("HTLLBB.Models.Post", b =>
                 {
                     b.HasOne("HTLLBB.Models.ApplicationUser", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorId");
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("HTLLBB.Models.Thread", "Thread")
                         .WithMany("Posts")
-                        .HasForeignKey("ThreadID");
+                        .HasForeignKey("ThreadId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("HTLLBB.Models.Thread", b =>
                 {
                     b.HasOne("HTLLBB.Models.Forum", "Forum")
                         .WithMany("Threads")
-                        .HasForeignKey("ForumID");
+                        .HasForeignKey("ForumId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -7,16 +7,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HTLLBB.Data;
 using HTLLBB.Models;
-using HTLLBB.Models.ForumsViewModels;
+using HTLLBB.Models.ForumViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace HTLLBB.Controllers
 {
     [Authorize(Roles = "Admin")]
-    public class ForumsController : ApplicationController
+    public class ForumController : ApplicationController
     {
-        public ForumsController(ApplicationDbContext context, 
+        public ForumController(ApplicationDbContext context, 
                                 UserManager<ApplicationUser> userManager, 
                                 SignInManager<ApplicationUser> signInManager) 
             : base(context, userManager, signInManager)
@@ -24,42 +24,34 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums
-        [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        [Authorize]
+        public async Task<IActionResult> Index(int? id)
         {
+            if (id == null) return NotFound();
+
             bool isAdmin = false;
             if (_signInManager.IsSignedIn(User))
             {
                 ApplicationUser user = await _userManager.GetUserAsync(User);
                 isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             }
-            IEnumerable<Category> categories = await _context.Categories.Include(c => c.Forums).ToListAsync();
 
-            return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
-        }
+            Forum forum = await _context.Forums
+                                        .Include(f => f.Category)
+                                        .Include(f => f.Threads)
+                                            .ThenInclude(t => t.Posts)
+                                            .ThenInclude(p => p.Author)
+                                        .SingleOrDefaultAsync(f => f.ID == id);
 
-        // GET: Forums/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var category = await _context.Categories
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
+            return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin });
         }
 
         // GET: Forums/Create
-        public IActionResult Create(int id)
+        public IActionResult Create(int? id)
         {
-            return View(new CreateViewModel { CatID = id });
+            if (id == null) return NotFound();
+
+            return View(new CreateViewModel { CatID = (int)id });
         }
 
         // POST: Forums/Create
@@ -79,22 +71,17 @@ namespace HTLLBB.Controllers
                 }
 
             }
-            return RedirectToAction(nameof(Index));	
+            return RedirectToAction("Index", "Category");	
         }
 
         // GET: Forums/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
-            if (forum == null)
-            {
-                return NotFound();
-            }
+            if (forum == null) return NotFound();
+
             return View(forum);
         }
 
@@ -129,7 +116,7 @@ namespace HTLLBB.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index", "Category");
             }
             return View(forum);
         }
@@ -137,10 +124,7 @@ namespace HTLLBB.Controllers
         // GET: Forums/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var forum = await _context.Forums
                 .SingleOrDefaultAsync(m => m.ID == id);
@@ -155,12 +139,14 @@ namespace HTLLBB.Controllers
         // POST: Forums/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
+            if (id == null) return NotFound();
+
             var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
             _context.Forums.Remove(forum);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Category");
         }
 
         private bool ForumExists(int id)
