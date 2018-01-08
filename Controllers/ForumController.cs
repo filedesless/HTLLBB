@@ -23,11 +23,21 @@ namespace HTLLBB.Controllers
         {
         }
 
-        // GET: Forums
+        // GET: Forum/{name}
         [Authorize]
-        public async Task<IActionResult> Index(int? id)
+        [Route("Forum/{name}")]
+        public async Task<IActionResult> Index(String name)
         {
-            if (id == null) return NotFound();
+            if (string.IsNullOrEmpty(name)) return NotFound();
+
+            Forum forum = await _context.Forums
+                                        .Include(f => f.Category)
+                                        .Include(f => f.Threads)
+                                            .ThenInclude(t => t.Posts)
+                                            .ThenInclude(p => p.Author)
+                                        .SingleOrDefaultAsync(f => f.Name == name);
+
+            if (forum == null) return NotFound();
 
             bool isAdmin = false;
             if (_signInManager.IsSignedIn(User))
@@ -36,17 +46,10 @@ namespace HTLLBB.Controllers
                 isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             }
 
-            Forum forum = await _context.Forums
-                                        .Include(f => f.Category)
-                                        .Include(f => f.Threads)
-                                            .ThenInclude(t => t.Posts)
-                                            .ThenInclude(p => p.Author)
-                                        .SingleOrDefaultAsync(f => f.ID == id);
-
             return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin });
         }
 
-        // GET: Forums/Create
+        // GET: Forum/Create
         public IActionResult Create(int? id)
         {
             if (id == null) return NotFound();
@@ -54,7 +57,7 @@ namespace HTLLBB.Controllers
             return View(new CreateViewModel { CatID = (int)id });
         }
 
-        // POST: Forums/Create
+        // POST: Forum/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
@@ -63,18 +66,23 @@ namespace HTLLBB.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
+                {
+                    ModelState.AddModelError("Name", "A Forum already exist with that name");
+                    return View();
+                }
+
                 var cat = await _context.Categories.SingleAsync(c => c.ID == model.CatID);
-                if (cat != null) 
+                if (cat != null)
                 {
                     cat.Forums.Add(new Forum { Name = model.Name });
                     await _context.SaveChangesAsync();
                 }
-
             }
             return RedirectToAction("Index", "Category");	
         }
 
-        // GET: Forums/Edit/5
+        // GET: Forum/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -90,14 +98,20 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Forum forum)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Forum model)
         {
-            if (id != forum.ID)
+            if (id != model.ID)
             {
                 return NotFound();
             }
 
-            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == forum.ID);
+            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == model.ID);
+
+            if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
+            {
+                ModelState.AddModelError("Name", "A Forum already exist with that name");
+                return View();
+            }
 
             if (await TryUpdateModelAsync(forumToUpdate, "", f => f.Name))
             {
@@ -107,7 +121,7 @@ namespace HTLLBB.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ForumExists(forum.ID))
+                    if (!ForumExists(model.ID))
                     {
                         return NotFound();
                     }
@@ -118,7 +132,7 @@ namespace HTLLBB.Controllers
                 }
                 return RedirectToAction("Index", "Category");
             }
-            return View(forum);
+            return View(model);
         }
 
         // GET: Forums/Delete/5

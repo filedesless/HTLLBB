@@ -36,7 +36,7 @@
         <div>
            @foreach (var forum in category.Forums) {
                 <div class="w3-bar" style="padding-left: 16px;">
-                    <a class="w3-bar-item" asp-controller="Forum" asp-route-id="@forum.ID"><i class="glyphicon glyphicon-chevron-right"></i> @forum.Name</a>
+                    <a class="w3-bar-item" asp-controller="Forum" asp-route-name="@forum.Name"><i class="glyphicon glyphicon-chevron-right"></i> @forum.Name</a>
                     @if (Model.IsAdmin) {
                         <div class="w3-right">
                             <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Forum" asp-action="Edit" asp-route-id="@forum.ID">

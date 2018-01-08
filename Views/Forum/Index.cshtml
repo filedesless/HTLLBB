@@ -3,7 +3,7 @@
 <div class="w3-grey w3-bar w3-xxlarge">
     <a class="w3-bar-item" asp-controller="Category">Forums</a>
     <span class="w3-bar-item">/</span>
-    <a class="w3-bar-item" asp-route-id="@Model.Forum.ID">@Model.Forum.Name</a>
+    <a class="w3-bar-item" asp-route-name="@Model.Forum.Name">@Model.Forum.Name</a>
     <a class="w3-dark-grey w3-right w3-bar-item w3-button" asp-controller="Thread" asp-action="Create" asp-route-id="@Model.Forum.ID">
         <span class="w3-small" style="vertical-align: middle;">Create Thread</span>
     </a>
@@ -18,8 +18,9 @@
                 <i class="glyphicon glyphicon-comment" style="vertical-align: middle;"></i>
             </div>
             <div class="w3-bar-item">
-                <span style="font-weight: bold;"> @thread.Title</span> <br />
-                <span class="w3-tiny" style="font-style: italic;"> By @thread.Posts.First().Author, </span>
+                <span style="font-weight: bold;">@thread.Title</span> <br />
+                <span class="w3-tiny" style="font-style: italic;">By @thread.Posts.First().Author, </span>
+                <span class="w3-tiny" style="font-style: italic; font-weight: bold;">@thread.Posts.First().CreationTime</span>
             </div>
         </div>
     </div>
