@@ -43,5 +43,6 @@
     <Folder Include="Models\CategoryViewModels\" />
     <Folder Include="Models\ThreadViewModels\" />
     <Folder Include="Views\Thread\" />
+    <Folder Include="Models\PostViewModels\" />
   </ItemGroup>
 </Project>

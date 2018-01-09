@@ -9,7 +9,7 @@ using HTLLBB.Data;
 using HTLLBB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using HTLLBB.Models.ThreadViewModels;
+using HTLLBB.Models.PostViewModels;
 
 namespace HTLLBB.Controllers
 {
@@ -30,17 +30,17 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int threadID, String content)
+        public async Task<IActionResult> Create(CreateViewModel model)
         {
             Thread thread = await _context.Thread
-                              .SingleOrDefaultAsync(t => t.ID == threadID);
+                              .SingleOrDefaultAsync(t => t.ID == model.ThreadID);
 
             if (ModelState.IsValid)
             {
                 Post post = new Post
                 {
                     Author = await _userManager.GetUserAsync(User),
-                    Content = content,
+                    Content = model.Content,
                     CreationTime = DateTime.UtcNow
                 };
 
