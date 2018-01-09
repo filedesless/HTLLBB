@@ -18,7 +18,7 @@
                 <i class="glyphicon glyphicon-comment" style="vertical-align: middle;"></i>
             </div>
             <div class="w3-bar-item">
-                <span style="font-weight: bold;">@thread.Title</span> <br />
+                <a style="font-weight: bold;" asp-controller="Thread" asp-route-title="@thread.Title">@thread.Title</a><br />
                 <span class="w3-tiny" style="font-style: italic;">By @thread.Posts.First().Author, </span>
                 <span class="w3-tiny" style="font-style: italic; font-weight: bold;">@thread.Posts.First().CreationTime</span>
             </div>

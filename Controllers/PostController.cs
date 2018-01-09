@@ -14,80 +14,43 @@ using HTLLBB.Models.ThreadViewModels;
 namespace HTLLBB.Controllers
 {
     [Authorize(Roles="Admin")]
-    public class ThreadController : ApplicationController
+    public class PostController : ApplicationController
     {
-        public ThreadController(ApplicationDbContext context,
+        public PostController(ApplicationDbContext context,
                                 UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager) 
             : base(context, userManager, signInManager)
         {
         }
 
-        // GET: Thread
-        [Route("Thread/{title}")]
-        public async Task<IActionResult> Index(String title)
-        {
-            if (string.IsNullOrWhiteSpace(title)) return NotFound();
 
-            Thread thread = await _context.Thread
-                                          .Include((Thread t) => t.Forum)
-                                            .ThenInclude((Forum f) => f.Category)
-                                          .Include((Thread t) => t.Posts)
-                                            .ThenInclude((Post p) => p.Author) 
-                                          .SingleOrDefaultAsync(t => t.Title == title);
-            
-            return View(thread);
-        }
-
-        // GET: Thread/Create
-        public IActionResult Create(int id)
-        {
-            var model = new CreateViewModel
-            {
-                ForumID = id
-            };
-
-            return View(model);
-        }
-
-        // POST: Thread/Create
+        // TODO: review and check rest
+        // POST: Post/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateViewModel model)
+        public async Task<IActionResult> Create(int threadID, String content)
         {
+            Thread thread = await _context.Thread
+                              .SingleOrDefaultAsync(t => t.ID == threadID);
+
             if (ModelState.IsValid)
             {
-                if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
+                Post post = new Post
                 {
-                    ModelState.AddModelError("Title", "A Thread already exist with that title");
-                    return View(model);
-                }
-
-                Thread thread = new Thread
-                {
-                    ForumId = model.ForumID,
-                    Title = model.Title,
-                    Posts = new List<Post> 
-                    { 
-                        new Post
-                        {
-                            Author = await _userManager.GetUserAsync(User),
-                            Content = model.Content,
-                            CreationTime = DateTime.UtcNow
-                        }
-                    }
+                    Author = await _userManager.GetUserAsync(User),
+                    Content = content,
+                    CreationTime = DateTime.UtcNow
                 };
 
-                _context.Add(thread);
+                thread.Posts.Add(post);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index), new { Title = thread.Title });
             }
-            return View(model);
+
+            return RedirectToAction("Index", "Thread", new { Title = thread.Title });
         }
 
-        // TODO: 
         // GET: Thread/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -133,7 +96,7 @@ namespace HTLLBB.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index");
             }
             ViewData["ForumId"] = new SelectList(_context.Forums, "ID", "ID", thread.ForumId);
             return View(thread);
@@ -166,7 +129,7 @@ namespace HTLLBB.Controllers
             var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
             _context.Thread.Remove(thread);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
         private bool ThreadExists(int id)

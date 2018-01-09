@@ -1,12 +1,36 @@
 @model HTLLBB.Models.Thread
 
-@{
-    ViewData["Title"] = $"{Model.Forum.Category.Name} / {Model.Forum.Name} / {Model.Title}";
-}
-
 <div class="w3-grey w3-bar w3-xxlarge">
-    <span class="w3-bar-item">@ViewData["Title"]</span>
-
+    <a class="w3-bar-item" asp-controller="Category">Forums</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-controller="Forum" asp-route-name="@Model.Forum.Name">@Model.Forum.Name</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-route-title="@Model.Title">@Model.Title</a>
 </div>
 
 <hr />
+
+@foreach (var post in Model.Posts) {
+    <div class="w3-row-padding">
+        <div class="w3-quarter w3-border w3-container w3-center">
+            <span>@post.Author.UserName</span>
+        </div>
+        <div class="w3-threequarter w3-border w3-container">@post.Content</div>
+    </div>
+}
+
+<hr />
+
+<form asp-action="Create" asp-controller="Post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <input type="hidden" name="ThreadID" value="@Model.ID">
+
+        <label asp-for="Content" class="control-label"></label>
+        <textarea asp-for="Content" class="form-control"></textarea>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Reply" class="btn btn-default" />
+    </div>
+</form>

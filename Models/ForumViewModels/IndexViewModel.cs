@@ -8,7 +8,9 @@ namespace HTLLBB.Models.ForumViewModels
 {
     public class IndexViewModel
     {
+        [Required]
         public bool IsAdmin { get; set; }
+        [Required]
         public Forum Forum { get; set; }
     }
 }

@@ -66,7 +66,7 @@ namespace HTLLBB.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
+                if (await _context.Forums.CountAsync((Forum arg) => arg.Name == model.Name) > 0)
                 {
                     ModelState.AddModelError("Name", "A Forum already exist with that name");
                     return View();
@@ -110,29 +110,26 @@ namespace HTLLBB.Controllers
             if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
             {
                 ModelState.AddModelError("Name", "A Forum already exist with that name");
-                return View();
+                return View(model);
             }
 
-            if (await TryUpdateModelAsync(forumToUpdate, "", f => f.Name))
+            try
             {
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ForumExists(model.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                forumToUpdate.Name = model.Name;
+                await _context.SaveChangesAsync();
                 return RedirectToAction("Index", "Category");
             }
-            return View(model);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ForumExists(model.ID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         // GET: Forums/Delete/5

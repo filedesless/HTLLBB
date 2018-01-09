@@ -29,6 +29,10 @@ namespace HTLLBB.Data
                    .HasIndex((Forum f) => f.Name)
                    .IsUnique();
 
+            builder.Entity<Thread>()
+                   .HasIndex((Thread t) => t.Title)
+                   .IsUnique();
+
         }
 
         public DbSet<Post> Posts { get; set; }
