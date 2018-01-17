@@ -35,9 +35,14 @@ namespace HTLLBB.Controllers
                 ApplicationUser user = await _userManager.GetUserAsync(User);
                 isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
             }
+
             IEnumerable<Category> categories = await _context.Categories
                                                              .Include(c => c.Forums)
+                                                             .OrderBy((Category cat) => cat.ID)
                                                              .ToListAsync();
+
+            foreach (var cat in categories)
+                cat.Forums = cat.Forums.OrderBy(forum => forum.ID).ToList();
 
             return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
         }
