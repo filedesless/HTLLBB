@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using HTLLBB.Data;
 using HTLLBB.Models;
 using HTLLBB.Services;
+using HTLLBB.Hubs;
 
 namespace HTLLBB
 {
@@ -43,6 +44,8 @@ namespace HTLLBB
 
             services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
 
+            services.AddSignalR();
+
             services.AddMvc();
         }
 
@@ -64,6 +67,10 @@ namespace HTLLBB
             app.UseStatusCodePages();
 
             app.UseAuthentication();
+
+            app.UseSignalR(routes =>
+                           routes.MapHub<ChatHub>("chat")
+            );
 
             app.UseMvc(routes =>
             {
