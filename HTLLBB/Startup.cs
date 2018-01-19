@@ -35,6 +35,13 @@ namespace HTLLBB
             services.AddIdentity<ApplicationUser, IdentityRole>(config =>
             {
                 config.SignIn.RequireConfirmedEmail = true;
+
+                config.User.RequireUniqueEmail = true;
+                config.User.AllowedUserNameCharacters += " '";
+
+                config.Lockout.MaxFailedAccessAttempts = 5;
+                config.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                config.Lockout.AllowedForNewUsers = true;
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
