@@ -1,7 +1,7 @@
 # HTLLBB
 
 
-Start with `dotnet run`, the application will start listening on http://localhost:5000. It is intended to run behind a reverse proxy like NGINX or IIS.
+Start with `dotnet run` in the src directory, the application will start listening on http://localhost:5000. It is intended to run behind a reverse proxy like NGINX or IIS.
 
 ### Reminder for deployment
 
@@ -26,14 +26,14 @@ Start with `dotnet run`, the application will start listening on http://localhos
 
 >A sample NGINX config for reverse proxy could look like:
 
-> _(In file /etc/nginx/site-enabled/default)_
 >
 ```
+# /etc/nginx/site-enabled/default
 location / {
 	proxy_pass http://localhost:5000;
 }
 
-> # SignalR stuff
+# SignalR stuff
 location /chat {
     proxy_read_timeout 86400s;
     proxy_send_timeout 86400s;
