@@ -28,21 +28,24 @@
 </div>
 
 @section Scripts {
-<script>
-    let connection = new signalR.HubConnection('/chat');
+@if (SignInManager.IsSignedIn(User))
+{
+    <script>
+        let connection = new signalR.HubConnection('/chat');
 
-    connection.on('send', (name, message) => {
-        $('#DisplayMessages')
-            .append("<div class='w3-row-padding'><p><b>" + name + "</b>: " + $('<div />').text(message).html() + "</p></div>")
-            .scrollTop($('#DisplayMessages').prop('scrollHeight'));
-    });
+        connection.on('send', (name, message) => {
+            $('#DisplayMessages')
+                .append("<div class='w3-row-padding'><p><b>" + name + "</b>: " + $('<div />').text(message).html() + "</p></div>")
+                .scrollTop($('#DisplayMessages').prop('scrollHeight'));
+        });
 
-    connection.start();//.then(() => connection.invoke('send', 'Hello'));
-    function SendMessage(){
-        var msg = document.getElementById("txtMessage");
-        connection.invoke('send', msg.value);
-        msg.value = "";
-        return false;
-    }
-</script>
+        connection.start();//.then(() => connection.invoke('send', 'Hello'));
+        function SendMessage(){
+            var msg = document.getElementById("txtMessage");
+            connection.invoke('send', msg.value);
+            msg.value = "";
+            return false;
+        }
+    </script>     
+}
 }
