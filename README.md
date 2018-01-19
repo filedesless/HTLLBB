@@ -10,7 +10,7 @@ Start with `dotnet run` in the src directory, the application will start listeni
 - Configure your SMTP settings and your connectionString in appsettings.Production.json.
 
 >Google's SMTP server uses config like
->
+
 ```
 "Smtp": {
 	"Server": "smtp.gmail.com",
@@ -26,7 +26,6 @@ Start with `dotnet run` in the src directory, the application will start listeni
 
 >A sample NGINX config for reverse proxy could look like:
 
->
 ```
 # /etc/nginx/site-enabled/default
 location / {
@@ -46,5 +45,3 @@ location /chat {
     proxy_cache_bypass $http_upgrade;
 }  
 ```
-
-
