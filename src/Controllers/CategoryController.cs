@@ -14,7 +14,7 @@ using HTLLBB.Models.CategoryViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public class CategoryController : ApplicationController
     {
         public CategoryController(ApplicationDbContext context,
@@ -69,6 +69,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -86,6 +87,7 @@ namespace HTLLBB.Controllers
         // POST: Forums/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null) return NotFound();
@@ -97,6 +99,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -114,6 +117,7 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Category category)
         {
             if (id != category.ID)

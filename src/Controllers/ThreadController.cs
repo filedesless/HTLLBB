@@ -13,7 +13,7 @@ using HTLLBB.Models.ThreadViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize(Roles="Admin")]
+    [Authorize]
     public class ThreadController : ApplicationController
     {
         public ThreadController(ApplicationDbContext context,
@@ -89,6 +89,7 @@ namespace HTLLBB.Controllers
 
         // TODO: 
         // GET: Thread/Edit/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -105,6 +106,7 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Title,ForumId")] Thread thread)
         {
             if (id != thread.ID) return NotFound();
@@ -140,6 +142,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Thread/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -161,6 +164,7 @@ namespace HTLLBB.Controllers
         // POST: Thread/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
