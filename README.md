@@ -29,7 +29,8 @@ Start with `dotnet run` in the src directory, the application will start listeni
 ```
 # /etc/nginx/site-enabled/default
 location / {
-	proxy_pass http://localhost:5000;
+    proxy_pass http://localhost:5000;
+    proxy_set_header Host $host;
 }
 
 # SignalR stuff
