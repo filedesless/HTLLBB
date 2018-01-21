@@ -7,6 +7,13 @@ Start with `dotnet run` in the src directory, the application will start listeni
 
 - Instal .NET Core on your host, see: [this article on Microsoft Doc](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x)
 
+- Configure the desired URL listening in `hosting.json`
+```
+{
+    "urls": "http://localhost:5000"
+}
+```
+
 - Configure your SMTP settings and your connectionString in appsettings.Production.json.
 
 >Google's SMTP server uses config like
