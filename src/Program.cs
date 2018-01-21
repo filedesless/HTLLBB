@@ -36,18 +36,9 @@ namespace HTLLBB
             host.Run();
         }
 
-        public static IWebHost BuildWebHost(string[] args) {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("hosting.json", optional: true)
-                .AddCommandLine(args)
+        public static IWebHost BuildWebHost(string[] args) =>
+            WebHost.CreateDefaultBuilder(args)
+                .UseStartup<Startup>()
                 .Build();
-                
-            return WebHost.CreateDefaultBuilder(args)
-                          .UseStartup<Startup>()
-                          .UseConfiguration(config)
-                          .Build();
-        }
-
     }
 }
