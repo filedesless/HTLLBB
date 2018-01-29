@@ -22,6 +22,8 @@ Start with `dotnet run` in the src directory, the application will start listeni
 
 - You must setup a MySQL database, and fill in the ConnectionString details.
 
+- Make sure "utf8mb4" is the charset used by your database schema
+
 - Setup NGINX to serve the backend as a reverse proxy
 
 >A sample NGINX config for reverse proxy could look like:

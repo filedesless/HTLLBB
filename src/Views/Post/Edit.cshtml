@@ -1,0 +1,34 @@
+@model HTLLBB.Models.Post
+
+<div class="w3-grey w3-bar w3-xxlarge">
+    <a class="w3-bar-item" asp-controller="Category">Forums</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-controller="Forum" asp-action="Index" asp-route-name="@Model.Thread.Forum.Name">@Model.Thread.Forum.Name</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-action="Index" asp-route-title="@Model.Thread.Title">@Model.Thread.Title</a>
+</div>
+
+<hr />
+
+<h2>Edit</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="Content" class="control-label"></label>
+                <input asp-for="Content" class="form-control" autofocus="autofocus" />
+                <span asp-validation-for="Content" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-default" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

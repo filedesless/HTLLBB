@@ -51,94 +51,112 @@ namespace HTLLBB.Controllers
             return RedirectToAction("Index", "Thread", new { Title = thread.Title });
         }
 
-        // GET: Thread/Edit/5
+        // GET: Post/Edit/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
-            if (thread == null) return NotFound();
+            var post = await _context.Posts
+                                     .Include(p => p.Thread)
+                                                .ThenInclude(t => t.Forum)
+                                     .SingleOrDefaultAsync(m => m.ID == id);
+            if (post == null) return NotFound();
 
-            ViewData["ForumId"] = new SelectList(_context.Forums, "ID", "ID", thread.ForumId);
-            return View(thread);
+            return View(post);
         }
 
-        // POST: Thread/Edit/5
+        // POST: Post/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,ForumId")] Thread thread)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Content")] Post post)
         {
-            if (id != thread.ID) return NotFound();
+            if (id != post.ID) return NotFound();
 
-            if (ModelState.IsValid)
+            Post postToUpdate = await _context.Posts
+                                              .Include(p => p.Thread)
+                                              .SingleOrDefaultAsync(p => p.ID == post.ID);
+
+            try
             {
-                if (await _context.Thread.CountAsync((Thread arg) => arg.Title == thread.Title) > 0)
-                {
-                    ModelState.AddModelError("Name", "A Thread already exist with that title");
-                    return View();
-                }
-
-                try
-                {
-                    _context.Update(thread);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ThreadExists(thread.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction("Index");
+                postToUpdate.Content = post.Content;
+                _context.Update(postToUpdate);
+                await _context.SaveChangesAsync();
             }
-            ViewData["ForumId"] = new SelectList(_context.Forums, "ID", "ID", thread.ForumId);
-            return View(thread);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PostExists(post.ID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return RedirectToAction("Index", "Thread", new { Title = postToUpdate.Thread.Title });
         }
 
-        // GET: Thread/Delete/5
+        // GET: Post/Delete/5
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var thread = await _context.Thread
-                .Include(t => t.Forum)
+            var post = await _context.Posts
+                .Include(p => p.Thread)
+                    .ThenInclude(t => t.Forum)
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if (thread == null)
-            {
-                return NotFound();
-            }
+            
+            if (post == null) return NotFound();
 
-            return View(thread);
+            return View(post);
         }
 
-        // POST: Thread/Delete/5
+        // POST: Post/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Thread.Remove(thread);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index");
+            var post = await _context.Posts
+                                     .Include(p => p.Thread)
+                                     .SingleOrDefaultAsync(m => m.ID == id);
+
+            var thread = await _context.Thread
+                                       .Include(t => t.Posts)
+                                       .Include(t => t.Forum)
+                                       .SingleOrDefaultAsync(t => t.ID == post.ThreadId);
+
+            var firstPost = thread.Posts
+                                .OrderBy(p => p.CreationTime)
+                                .First();
+
+            // deleting first post deletes thread
+            if (post.ID == firstPost.ID)
+            {
+                _context.Thread.Remove(post.Thread);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Forum", new { Name = thread.Forum.Name });
+
+            } else
+            {
+                _context.Posts.Remove(post);
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Index", "Thread", new { Title = post.Thread.Title });
+            }
+
         }
 
-        private bool ThreadExists(int id)
+        private bool PostExists(int id)
         {
-            return _context.Thread.Any(e => e.ID == id);
+            return _context.Posts.Any(e => e.ID == id);
         }
     }
 }

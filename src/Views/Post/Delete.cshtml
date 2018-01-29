@@ -1,0 +1,33 @@
+@model HTLLBB.Models.Post
+
+@{
+    ViewData["Title"] = "Delete";
+}
+<div class="w3-grey w3-bar w3-xxlarge">
+    <a class="w3-bar-item" asp-controller="Category">Forums</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-controller="Forum" asp-action="Index" asp-route-name="@Model.Thread.Forum.Name">@Model.Thread.Forum.Name</a>
+    <span class="w3-bar-item">/</span>
+    <a class="w3-bar-item" asp-action="Index" asp-route-title="@Model.Thread.Title">@Model.Thread.Title</a>
+</div>
+
+<hr />
+<h2>Delete</h2>
+<hr />
+
+<h3>Are you sure you want to delete this post?</h3>
+<div>
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Content) :
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Content)
+        </dd>
+    </dl>
+    
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="ID" />
+        <input type="submit" value="Delete" class="btn btn-default" />
+    </form>
+</div>

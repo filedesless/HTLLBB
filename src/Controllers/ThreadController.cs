@@ -35,7 +35,9 @@ namespace HTLLBB.Controllers
                                           .Include((Thread t) => t.Posts)
                                             .ThenInclude((Post p) => p.Author) 
                                           .SingleOrDefaultAsync(t => t.Title == title);
-            
+
+            if (thread == null) return NotFound();
+
             return View(thread);
         }
 
@@ -94,10 +96,11 @@ namespace HTLLBB.Controllers
         {
             if (id == null) return NotFound();
 
-            var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
+            var thread = await _context.Thread
+                                       .Include(t => t.Forum)
+                                       .SingleOrDefaultAsync(m => m.ID == id);
             if (thread == null) return NotFound();
 
-            ViewData["ForumId"] = new SelectList(_context.Forums, "ID", "ID", thread.ForumId);
             return View(thread);
         }
 
@@ -107,38 +110,38 @@ namespace HTLLBB.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title,ForumId")] Thread thread)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Title")] Thread model)
         {
-            if (id != thread.ID) return NotFound();
+            if (id != model.ID) return NotFound();
 
-            if (ModelState.IsValid)
+            Thread threadToUpdate = await _context.Thread
+                                                  .Include(t => t.Forum)
+                                                  .SingleOrDefaultAsync(t => t.ID == model.ID);
+
+            if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
             {
-                if (await _context.Thread.CountAsync((Thread arg) => arg.Title == thread.Title) > 0)
-                {
-                    ModelState.AddModelError("Name", "A Thread already exist with that title");
-                    return View();
-                }
-
-                try
-                {
-                    _context.Update(thread);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ThreadExists(thread.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                ModelState.AddModelError("Title", "A Thread already exist with that title");
+                return View();
             }
-            ViewData["ForumId"] = new SelectList(_context.Forums, "ID", "ID", thread.ForumId);
-            return View(thread);
+
+            try
+            {
+                threadToUpdate.Title = model.Title;
+                _context.Update(threadToUpdate);
+                await _context.SaveChangesAsync();
+                return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!ThreadExists(model.ID))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         // GET: Thread/Delete/5
@@ -167,10 +170,13 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var thread = await _context.Thread.SingleOrDefaultAsync(m => m.ID == id);
+            var thread = await _context.Thread
+                                       .Include(t => t.Forum)
+                                       .SingleOrDefaultAsync(m => m.ID == id);
+            String forumName = thread.Forum.Name;
             _context.Thread.Remove(thread);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Forum", new { Name = forumName });
         }
 
         private bool ThreadExists(int id)

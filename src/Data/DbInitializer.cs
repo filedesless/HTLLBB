@@ -19,11 +19,13 @@ namespace HTLLBB.Data
 
             if (userManager.FindByNameAsync("root").Result == null)
             {
-                var user = new ApplicationUser() { UserName = "root" };
+                var user = new ApplicationUser { 
+                    UserName = "root", 
+                    EmailConfirmed = true, 
+                    Email = "root@localhost" 
+                };
                 userManager.CreateAsync(user, "Password123!").Wait();
                 userManager.AddToRoleAsync(user, "Admin").Wait();
-                user.EmailConfirmed = true;
-                userManager.UpdateAsync(user).Wait();
             }
         }
     }
