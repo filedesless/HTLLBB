@@ -43,7 +43,9 @@
                 .scrollTop($('#DisplayMessages').prop('scrollHeight'));
         });
 
-        connection.start();//.then(() => connection.invoke('send', 'Hello'));
+        connection.start()
+            .then(() => connection.invoke('RetrieveMessages'));
+            
         function SendMessage(){
             var msg = document.getElementById("txtMessage");
             connection.invoke('send', msg.value);

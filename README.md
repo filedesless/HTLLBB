@@ -48,3 +48,11 @@ location /chat {
     proxy_cache_bypass $http_upgrade;
 }  
 ```
+
+- Setup a redis-server instance, and fill in the Redis Address
+
+```
+"Redis": {
+	"Address": "localhost"
+}
+```
