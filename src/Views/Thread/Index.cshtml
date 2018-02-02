@@ -1,16 +1,16 @@
-@model HTLLBB.Models.Thread
+@model HTLLBB.Models.ThreadViewModels.IndexViewModel
 
 <div class="w3-grey w3-bar w3-xxlarge">
     <a class="w3-bar-item" asp-controller="Category">Forums</a>
     <span class="w3-bar-item">/</span>
-    <a class="w3-bar-item" asp-controller="Forum" asp-route-name="@Model.Forum.Name">@Model.Forum.Name</a>
+    <a class="w3-bar-item" asp-controller="Forum" asp-route-name="@Model.Thread.Forum.Name">@Model.Thread.Forum.Name</a>
     <span class="w3-bar-item">/</span>
-    <a class="w3-bar-item" asp-route-title="@Model.Title">@Model.Title</a>
+    <a class="w3-bar-item" asp-route-title="@Model.Thread.Title">@Model.Thread.Title</a>
 </div>
 
 <hr />
 
-@foreach (var post in Model.Posts) {
+@foreach (var post in Model.Thread.Posts) {
     <div class="w3-row-padding w3-border w3-dark-grey" style="padding: 1em 1em .5em .5em; margin: 1em 0em;">
         <div class="w3-center w3-col" style="width: 6em; ">
             <img src="~/images/no_avatar.jpg" class="w3-image w3-border" style="width: 5em;">
@@ -20,8 +20,10 @@
             <pre>@post.Content</pre>
         </div>
         <p class="w3-right w3-tiny">
-            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Edit" asp-route-id="@post.ID">Edit</a>
-            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Delete" asp-route-id="@post.ID">Delete</a>
+            @if (Model.IsAdmin) {
+                <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Edit" asp-route-id="@post.ID">Edit</a>
+                <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Delete" asp-route-id="@post.ID">Delete</a>
+            }
         </p>
     </div>
 }
@@ -31,7 +33,7 @@
 <form asp-action="Create" asp-controller="Post">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <div class="form-group">
-        <input type="hidden" name="ThreadID" value="@Model.ID">
+        <input type="hidden" name="ThreadID" value="@Model.Thread.ID">
 
         <label for="Content" class="control-label"></label>
         <textarea name="Content" class="form-control"></textarea>

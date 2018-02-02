@@ -36,9 +36,12 @@ namespace HTLLBB.Controllers
                                             .ThenInclude((Post p) => p.Author) 
                                           .SingleOrDefaultAsync(t => t.Title == title);
 
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
+
             if (thread == null) return NotFound();
 
-            return View(thread);
+            return View(new IndexViewModel { Thread = thread, IsAdmin = isAdmin });
         }
 
         // GET: Thread/Create
