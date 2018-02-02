@@ -42,7 +42,7 @@ namespace HTLLBB.Controllers
             if (_signInManager.IsSignedIn(User))
             {
                 ApplicationUser user = await _userManager.GetUserAsync(User);
-                isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
             }
 
             return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin });
@@ -82,7 +82,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forum/Edit/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -98,7 +98,7 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Forum model)
         {
             if (id != model.ID)
@@ -134,7 +134,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums/Delete/5
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -152,7 +152,7 @@ namespace HTLLBB.Controllers
         // POST: Forums/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (id == null) return NotFound();

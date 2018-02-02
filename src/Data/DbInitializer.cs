@@ -14,8 +14,8 @@ namespace HTLLBB.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            if (! roleManager.RoleExistsAsync("Admin").Result )
-                roleManager.CreateAsync(new IdentityRole { Name = "Admin" }).Wait();
+            if (! roleManager.RoleExistsAsync(Roles.Admin).Result )
+                roleManager.CreateAsync(new IdentityRole { Name = Roles.Admin }).Wait();
 
             if (userManager.FindByNameAsync("root").Result == null)
             {
@@ -25,7 +25,7 @@ namespace HTLLBB.Data
                     Email = "root@localhost" 
                 };
                 userManager.CreateAsync(user, "Password123!").Wait();
-                userManager.AddToRoleAsync(user, "Admin").Wait();
+                userManager.AddToRoleAsync(user, Roles.Admin).Wait();
             }
         }
     }
