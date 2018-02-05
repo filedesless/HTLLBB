@@ -8,15 +8,6 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>..\bin\Debug\netcoreapp2.0</OutputPath>
-    <CustomCommands>
-      <CustomCommands>
-        <Command>
-          <type>Build</type>
-          <command>docker-compose up --build</command>
-          <externalConsole>True</externalConsole>
-        </Command>
-      </CustomCommands>
-    </CustomCommands>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>..\bin\Release\netcoreapp2.0</OutputPath>
