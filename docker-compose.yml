@@ -9,7 +9,7 @@ services:
     depends_on:
         - mysql
         - redis
-    command: ["./wait-for-it.sh", "mysql:3306", "-t", "30", "--", "dotnet", "src.dll"]
+    command: ["./wait-for-it.sh", "mysql:3306", "-t", "0", "--", "dotnet", "src.dll"]
 
   redis:
     image: redis:alpine
