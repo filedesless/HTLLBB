@@ -5,7 +5,7 @@ Start with `dotnet run` in the src directory, the application will start listeni
 
 ### Reminder for deployment
 
-- Instal .NET Core on your host, see: [this article on Microsoft Doc](https://docs.microsoft.com/en-us/dotnet/core/linux-prerequisites?tabs=netcore2x)
+- Install docker-ce and docker-compose on your host
 
 - Configure your SMTP settings and your connectionString in appsettings.Production.json.
 
@@ -20,9 +20,7 @@ Start with `dotnet run` in the src directory, the application will start listeni
 }
 ```
 
-- You must setup a MySQL database, and fill in the ConnectionString details.
-
-- Make sure "utf8mb4" is the charset used by your database schema
+- Make sure the connectionString matches the mysql docker-compose.yml
 
 - Setup NGINX to serve the backend as a reverse proxy
 
@@ -49,10 +47,10 @@ location /chat {
 }  
 ```
 
-- Setup a redis-server instance, and fill in the Redis Address
+- the Redis Address correspond to the redis service name in docker-compose.yml
 
 ```
 "Redis": {
-	"Address": "localhost"
+	"Address": "redis"
 }
 ```
