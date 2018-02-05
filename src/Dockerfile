@@ -16,4 +16,5 @@ FROM microsoft/aspnetcore
 WORKDIR /app
 
 COPY --from=builder /app .
-ENTRYPOINT ["dotnet", "src.dll"]
+COPY wait-for-it.sh .
+RUN chmod +x wait-for-it.sh

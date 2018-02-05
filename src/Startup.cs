@@ -32,9 +32,7 @@ namespace HTLLBB
         {
             services.AddDbContext<ApplicationDbContext>(
                 options => options.UseMySql(
-                            Configuration.GetConnectionString("DefaultConnection"),
-                            mysqlOptions => mysqlOptions.EnableRetryOnFailure(20, TimeSpan.FromSeconds(5), null)
-                           )
+                            Configuration.GetConnectionString("DefaultConnection"))
                 );
 
             services.AddIdentity<ApplicationUser, IdentityRole>(config =>
