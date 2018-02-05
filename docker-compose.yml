@@ -9,15 +9,30 @@ services:
     depends_on:
         - mysql
         - redis
+        - nginx
+    restart: always
+    ports:
+      - 5000:5000
+    environment:
+      ASPNETCORE_URLS: "http://*:5000"
     command: ["./wait-for-it.sh", "mysql:3306", "-t", "0", "--", "dotnet", "src.dll"]
 
   redis:
     image: redis:alpine
+    restart: always
 
   mysql:
     image: mysql
+    restart: always
     environment:
         MYSQL_RANDOM_ROOT_PASSWORD: "yes"
         MYSQL_DATABASE: "HTLLBB"
         MYSQL_USER: "aspnet"
         MYSQL_PASSWORD: "aspnet"
+
+  nginx:
+    image: reverseproxy
+    build: ./nginx
+    ports:
+      - 80:80
+    restart: always
