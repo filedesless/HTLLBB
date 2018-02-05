@@ -1,22 +1,17 @@
-@model HTLLBB.Models.Thread
+@model HTLLBB.Models.ThreadViewModels.EditViewModel
 
-<div class="w3-grey w3-bar w3-xxlarge">
-    <a class="w3-bar-item" asp-controller="Category">Forums</a>
-    <span class="w3-bar-item">/</span>
-    <a class="w3-bar-item" asp-controller="Forum" asp-action="Index" asp-route-name="@Model.Forum.Name">@Model.Forum.Name</a>
-    <span class="w3-bar-item">/</span>
-    <a class="w3-bar-item" asp-action="Index" asp-route-title="@Model.Title">@Model.Title</a>
-</div>
-
-<hr />
+@{
+    ViewData["Title"] = "Edit";
+}
 
 <h2>Edit</h2>
 
+<h4>Thread</h4>
+<hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ID" />
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
                 <input asp-for="Title" class="form-control" autofocus="autofocus" />

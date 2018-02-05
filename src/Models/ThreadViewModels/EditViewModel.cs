@@ -5,14 +5,10 @@ using System.Threading.Tasks;
 
 namespace HTLLBB.Models.ThreadViewModels
 {
-    public class CreateViewModel
+    public class EditViewModel
     {
-        [Required]
-        public int ForumID { get; set; }
         [Required]
         [RegularExpression("[^/]+", ErrorMessage = "The field Title must not contain slashes")]
         public String Title { get; set; }
-        [Required]
-        public String Content { get; set; }
     }
 }

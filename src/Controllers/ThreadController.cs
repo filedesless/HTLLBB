@@ -74,8 +74,8 @@ namespace HTLLBB.Controllers
                 {
                     ForumId = model.ForumID,
                     Title = model.Title,
-                    Posts = new List<Post> 
-                    { 
+                    Posts = new List<Post>
+                    {
                         new Post
                         {
                             Author = await _userManager.GetUserAsync(User),
@@ -89,7 +89,9 @@ namespace HTLLBB.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index), new { Title = thread.Title });
             }
+
             return View(model);
+            
         }
 
         // TODO: 
@@ -100,11 +102,11 @@ namespace HTLLBB.Controllers
             if (id == null) return NotFound();
 
             var thread = await _context.Thread
-                                       .Include(t => t.Forum)
                                        .SingleOrDefaultAsync(m => m.ID == id);
+            
             if (thread == null) return NotFound();
 
-            return View(thread);
+            return View(new EditViewModel { Title = thread.Title });
         }
 
         // POST: Thread/Edit/5
@@ -113,38 +115,37 @@ namespace HTLLBB.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Title")] Thread model)
+        public async Task<IActionResult> Edit(int id, EditViewModel model)
         {
-            if (id != model.ID) return NotFound();
-
             Thread threadToUpdate = await _context.Thread
                                                   .Include(t => t.Forum)
-                                                  .SingleOrDefaultAsync(t => t.ID == model.ID);
+                                                  .SingleOrDefaultAsync(t => t.ID == id);
+
+            if (threadToUpdate.Title == model.Title)
+                return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
 
             if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
-            {
                 ModelState.AddModelError("Title", "A Thread already exist with that title");
-                return View();
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    threadToUpdate.Title = model.Title;
+                    _context.Update(threadToUpdate);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ThreadExists(id))
+                        return NotFound();
+
+                }
             }
 
-            try
-            {
-                threadToUpdate.Title = model.Title;
-                _context.Update(threadToUpdate);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ThreadExists(model.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            return View(model);
+
         }
 
         // GET: Thread/Delete/5

@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace HTLLBB.Models.ForumViewModels
 {
-    public class CreateViewModel
+    public class EditViewModel
     {
-        [Required]
-        public int CatID { get; set; }
         [Required]
         [RegularExpression("[^/]+", ErrorMessage = "The field Name must not contain slashes")]
         public String Name { get; set; }

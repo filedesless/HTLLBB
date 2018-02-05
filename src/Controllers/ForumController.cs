@@ -78,6 +78,9 @@ namespace HTLLBB.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
+            else
+                return View(model);
+            
             return RedirectToAction("Index", "Category");	
         }
 
@@ -87,10 +90,12 @@ namespace HTLLBB.Controllers
         {
             if (id == null) return NotFound();
 
-            var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
+            var forum = await _context.Forums
+                                      .SingleOrDefaultAsync(m => m.ID == id);
+            
             if (forum == null) return NotFound();
 
-            return View(forum);
+            return View(new EditViewModel { Name = forum.Name });
         }
 
         // POST: Forums/Edit/5
@@ -99,38 +104,33 @@ namespace HTLLBB.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = Roles.Admin)]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Forum model)
+        public async Task<IActionResult> Edit(int id, EditViewModel model)
         {
-            if (id != model.ID)
-            {
-                return NotFound();
-            }
+            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == id);
 
-            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == model.ID);
+            if (forumToUpdate.Name == model.Name)
+                return RedirectToAction("Index", "Category");
 
             if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
-            {
                 ModelState.AddModelError("Name", "A Forum already exist with that name");
-                return View(model);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    forumToUpdate.Name = model.Name;
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index", "Category");
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ForumExists(id))
+                        return NotFound();
+                }
             }
 
-            try
-            {
-                forumToUpdate.Name = model.Name;
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Category");
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ForumExists(model.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            return View(model);
+
         }
 
         // GET: Forums/Delete/5
