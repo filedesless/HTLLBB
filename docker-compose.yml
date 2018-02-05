@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  src:
+    image: src
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    depends_on:
+        - mysql
+        - redis
+
+  redis:
+    image: redis:alpine
+
+  mysql:
+    image: mysql
+    environment:
+        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        MYSQL_DATABASE: "HTLLBB"
+        MYSQL_USER: "aspnet"
+        MYSQL_PASSWORD: "aspnet"
