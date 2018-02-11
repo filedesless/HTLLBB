@@ -12,7 +12,7 @@ namespace HTLLBB.Repository
     {
         readonly ApplicationDbContext _ctx;
 
-        public EFCategoryRepository(ApplicationDbContext ctx)
+        public EFCategoryRepository(ApplicationDbContext ctx) 
             => _ctx = ctx;
 
         public async Task AddCategory(Category category)
@@ -26,16 +26,15 @@ namespace HTLLBB.Repository
 
         public async Task DelCategory(int id)
         {
-            _ctx.Remove(await _ctx.FindAsync<Category>(id));
+            _ctx.Remove(await GetCategoryById(id));
             await _ctx.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Category>> GetCategories(bool includeForums)
+        public async Task<IEnumerable<Category>> GetCategories()
         {
-            DbSet<Category> cats = _ctx.Categories;
-            if (includeForums)
-                cats.Include(cat => cat.Forums);
-            return await cats.ToListAsync();
+            return await _ctx.Categories
+                             .Include(cat => cat.Forums)
+                             .ToListAsync();
         }
 
         public async Task<Category> GetCategoryById(int id)

@@ -7,7 +7,7 @@ namespace HTLLBB.Repository
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetCategories(bool includeForums);
+        Task<IEnumerable<Category>> GetCategories();
         Task<Category> GetCategoryById(int id);
         Task<Boolean> CategoryExists(int id);
 

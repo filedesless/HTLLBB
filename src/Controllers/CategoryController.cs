@@ -41,8 +41,7 @@ namespace HTLLBB.Controllers
                 isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
             }
 
-            IEnumerable<Category> categories = 
-                await _repo.GetCategories(includeForums: true);
+            IEnumerable<Category> categories = await _repo.GetCategories();
 
             categories.OrderBy( (Category arg) => arg.ID );
 
@@ -93,9 +92,6 @@ namespace HTLLBB.Controllers
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (!id.HasValue) return NotFound();
-
-            var category = await _repo.GetCategoryById(id.Value);
-            if (category == null) return NotFound();
 
             await _repo.DelCategory(id.Value);
 
