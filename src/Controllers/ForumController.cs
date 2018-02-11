@@ -10,17 +10,24 @@ using HTLLBB.Models;
 using HTLLBB.Models.ForumViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using HTLLBB.Repository;
 
 namespace HTLLBB.Controllers
 {
     [Authorize]
-    public class ForumController : ApplicationController
+    public class ForumController : Controller
     {
-        public ForumController(ApplicationDbContext context, 
+        readonly IForumRepository _repo;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public ForumController(IForumRepository repo, 
                                 UserManager<ApplicationUser> userManager, 
                                 SignInManager<ApplicationUser> signInManager) 
-            : base(context, userManager, signInManager)
         {
+            _repo = repo;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // GET: Forum/{name}
@@ -29,13 +36,7 @@ namespace HTLLBB.Controllers
         {
             if (string.IsNullOrEmpty(name)) return NotFound();
 
-            Forum forum = await _context.Forums
-                                        .Include(f => f.Category)
-                                        .Include(f => f.Threads)
-                                            .ThenInclude(t => t.Posts)
-                                            .ThenInclude(p => p.Author)
-                                        .SingleOrDefaultAsync(f => f.Name == name);
-
+            var forum = await _repo.GetForumByName(name);
             if (forum == null) return NotFound();
 
             bool isAdmin = false;
@@ -51,9 +52,9 @@ namespace HTLLBB.Controllers
         // GET: Forum/Create
         public IActionResult Create(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            return View(new CreateViewModel { CatID = (int)id });
+            return View(new CreateViewModel { CatID = id.Value });
         }
 
         // POST: Forum/Create
@@ -65,18 +66,14 @@ namespace HTLLBB.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await _context.Forums.CountAsync((Forum arg) => arg.Name == model.Name) > 0)
+                if (await _repo.ForumExists(model.Name))
                 {
                     ModelState.AddModelError("Name", "A Forum already exist with that name");
                     return View();
                 }
 
-                var cat = await _context.Categories.SingleAsync(c => c.ID == model.CatID);
-                if (cat != null)
-                {
-                    cat.Forums.Add(new Forum { Name = model.Name });
-                    await _context.SaveChangesAsync();
-                }
+                var forum = new Forum { Name = model.Name };
+                await _repo.AddForum(forum, model.CatID);
             }
             else
                 return View(model);
@@ -88,11 +85,9 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var forum = await _context.Forums
-                                      .SingleOrDefaultAsync(m => m.ID == id);
-            
+            var forum = await _repo.GetForumById(id.Value);
             if (forum == null) return NotFound();
 
             return View(new EditViewModel { Name = forum.Name });
@@ -106,45 +101,32 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, EditViewModel model)
         {
-            Forum forumToUpdate = await _context.Forums.SingleOrDefaultAsync(f => f.ID == id);
+            var forumToUpdate = await _repo.GetForumById(id);
 
             if (forumToUpdate.Name == model.Name)
                 return RedirectToAction("Index", "Category");
 
-            if (_context.Forums.Count((Forum arg) => arg.Name == model.Name) > 0)
+            if (await _repo.ForumExists(model.Name))
                 ModelState.AddModelError("Name", "A Forum already exist with that name");
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    forumToUpdate.Name = model.Name;
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction("Index", "Category");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ForumExists(id))
-                        return NotFound();
-                }
+                forumToUpdate.Name = model.Name;
+                await _repo.UpdForum(forumToUpdate);
+                return RedirectToAction("Index", "Category");
             }
 
             return View(model);
-
         }
 
         // GET: Forums/Delete/5
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var forum = await _context.Forums
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (forum == null)
-            {
-                return NotFound();
-            }
+            var forum = await _repo.GetForumById(id.Value);
+            if (forum == null) return NotFound();
 
             return View(forum);
         }
@@ -155,17 +137,11 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var forum = await _context.Forums.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Forums.Remove(forum);
-            await _context.SaveChangesAsync();
+            await _repo.DelForum(id.Value);
+
             return RedirectToAction("Index", "Category");
-        }
-
-        private bool ForumExists(int id)
-        {
-            return _context.Forums.Any(e => e.ID == id);
         }
     }
 }
