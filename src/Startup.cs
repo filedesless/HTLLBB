@@ -15,6 +15,7 @@ using HTLLBB.Models;
 using HTLLBB.Services;
 using HTLLBB.Hubs;
 using StackExchange.Redis;
+using HTLLBB.Repository;
 
 namespace HTLLBB
 {
@@ -52,6 +53,8 @@ namespace HTLLBB
             // Add application services.
             services.AddTransient<IEmailSender, EmailSender>();
             services.AddTransient<IRedisConnection, RedisConnection>();
+
+            services.AddTransient<ICategoryRepository, EFCategoryRepository>();
 
             services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
             services.Configure<RedisConfig>(Configuration.GetSection("Redis"));

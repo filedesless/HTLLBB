@@ -66,5 +66,6 @@
     <Folder Include="Models\PostViewModels\" />
     <Folder Include="Hubs\" />
     <Folder Include="Views\Post\" />
+    <Folder Include="Repository\" />
   </ItemGroup>
 </Project>

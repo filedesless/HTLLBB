@@ -9,19 +9,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HTLLBB.Models.CategoryViewModels;
-
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using HTLLBB.Repository;
 
 namespace HTLLBB.Controllers
 {
     [Authorize]
-    public class CategoryController : ApplicationController
+    public class CategoryController : Controller
     {
-        public CategoryController(ApplicationDbContext context,
+        readonly ICategoryRepository _repo;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public CategoryController(ICategoryRepository repo,
                                   UserManager<ApplicationUser> userManager,
                                   SignInManager<ApplicationUser> signInManager)
-            : base(context, userManager, signInManager)
         {
+            _repo = repo;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // GET: Forums
@@ -36,15 +41,18 @@ namespace HTLLBB.Controllers
                 isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
             }
 
-            IEnumerable<Category> categories = await _context.Categories
-                                                             .Include(c => c.Forums)
-                                                             .OrderBy((Category cat) => cat.ID)
-                                                             .ToListAsync();
+            IEnumerable<Category> categories = 
+                await _repo.GetCategories(includeForums: true);
+
+            categories.OrderBy( (Category arg) => arg.ID );
 
             foreach (var cat in categories)
                 cat.Forums = cat.Forums.OrderBy(forum => forum.ID).ToList();
 
-            return View(new IndexViewModel { Categories = categories, IsAdmin = isAdmin });
+            return View(new IndexViewModel { 
+                Categories = categories, 
+                IsAdmin = isAdmin 
+            });
         }
 
         // GET: Forums/Create
@@ -61,10 +69,8 @@ namespace HTLLBB.Controllers
         public async Task<IActionResult> Create([Bind("Name")] Category category)
         {
             if (ModelState.IsValid)
-            {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-            }
+                await _repo.AddCategory(category);
+            
             return RedirectToAction(nameof(Index));
         }
 
@@ -72,14 +78,10 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var category = await _context.Categories
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            var category = await _repo.GetCategoryById(id.Value);
+            if (category == null) return NotFound();
 
             return View(category);
         }
@@ -90,11 +92,13 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
+            var category = await _repo.GetCategoryById(id.Value);
+            if (category == null) return NotFound();
+
+            await _repo.DelCategory(id.Value);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -102,13 +106,11 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var category = await _context.Categories.SingleOrDefaultAsync(m => m.ID == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            var category = await _repo.GetCategoryById(id.Value);
+            if (category == null) return NotFound();
+
             return View(category);
         }
 
@@ -120,37 +122,14 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Category category)
         {
-            if (id != category.ID)
-            {
-                return NotFound();
-            }
+            if (id != category.ID) return NotFound();
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CategoryExists(category.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                await _repo.UpdCategory(category);
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
-        }
-
-        private bool CategoryExists(int id)
-        {
-            return _context.Categories.Any(e => e.ID == id);
         }
     }
 }
