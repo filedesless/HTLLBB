@@ -1,30 +1,34 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using HTLLBB.Data;
 using HTLLBB.Models;
+using HTLLBB.Models.PostViewModels;
+using HTLLBB.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using HTLLBB.Models.PostViewModels;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HTLLBB.Controllers
 {
     [Authorize]
-    public class PostController : ApplicationController
+    public class PostController : Controller
     {
-        public PostController(ApplicationDbContext context,
+        readonly IPostRepository _repo;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public PostController(IPostRepository repo,
                                 UserManager<ApplicationUser> userManager,
                                 SignInManager<ApplicationUser> signInManager) 
-            : base(context, userManager, signInManager)
+            
         {
+            _repo = repo;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
 
-        // TODO: review and check rest
         // POST: Post/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -32,8 +36,7 @@ namespace HTLLBB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateViewModel model)
         {
-            Thread thread = await _context.Thread
-                              .SingleOrDefaultAsync(t => t.ID == model.ThreadID);
+            Thread thread = await _repo.GetThreadById(model.ThreadID);
 
             if (ModelState.IsValid)
             {
@@ -41,11 +44,10 @@ namespace HTLLBB.Controllers
                 {
                     Author = await _userManager.GetUserAsync(User),
                     Content = model.Content,
-                    CreationTime = DateTime.UtcNow
+                    CreationTime = DateTime.UtcNow,
                 };
 
-                thread.Posts.Add(post);
-                await _context.SaveChangesAsync();
+                await _repo.AddPost(post, model.ThreadID);
             }
 
             return RedirectToAction("Index", "Thread", new { Title = thread.Title });
@@ -55,12 +57,9 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var post = await _context.Posts
-                                     .Include(p => p.Thread)
-                                                .ThenInclude(t => t.Forum)
-                                     .SingleOrDefaultAsync(m => m.ID == id);
+            Post post = await _repo.GetPostById(id.Value);
             if (post == null) return NotFound();
 
             return View(post);
@@ -76,27 +75,10 @@ namespace HTLLBB.Controllers
         {
             if (id != post.ID) return NotFound();
 
-            Post postToUpdate = await _context.Posts
-                                              .Include(p => p.Thread)
-                                              .SingleOrDefaultAsync(p => p.ID == post.ID);
+            Post postToUpdate = await _repo.GetPostById(id);
 
-            try
-            {
-                postToUpdate.Content = post.Content;
-                _context.Update(postToUpdate);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!PostExists(post.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            postToUpdate.Content = post.Content;
+            await _repo.UpdPost(postToUpdate);
 
             return RedirectToAction("Index", "Thread", new { Title = postToUpdate.Thread.Title });
         }
@@ -105,13 +87,9 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var post = await _context.Posts
-                .Include(p => p.Thread)
-                    .ThenInclude(t => t.Forum)
-                .SingleOrDefaultAsync(m => m.ID == id);
-            
+            Post post = await _repo.GetPostById(id.Value);
             if (post == null) return NotFound();
 
             return View(post);
@@ -123,40 +101,22 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var post = await _context.Posts
-                                     .Include(p => p.Thread)
-                                     .SingleOrDefaultAsync(m => m.ID == id);
+            Post post = await _repo.GetPostById(id);
+            Thread thread = await _repo.GetThreadById(post.ThreadId);
 
-            var thread = await _context.Thread
-                                       .Include(t => t.Posts)
-                                       .Include(t => t.Forum)
-                                       .SingleOrDefaultAsync(t => t.ID == post.ThreadId);
-
-            var firstPost = thread.Posts
+            Post firstPost = thread.Posts
                                 .OrderBy(p => p.CreationTime)
                                 .First();
 
             // deleting first post deletes thread
             if (post.ID == firstPost.ID)
             {
-                _context.Thread.Remove(post.Thread);
-                await _context.SaveChangesAsync();
-
+                await _repo.DelThread(post.Thread.ID);
                 return RedirectToAction("Index", "Forum", new { Name = thread.Forum.Name });
-
-            } else
-            {
-                _context.Posts.Remove(post);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Index", "Thread", new { Title = post.Thread.Title });
             }
 
-        }
-
-        private bool PostExists(int id)
-        {
-            return _context.Posts.Any(e => e.ID == id);
+            await _repo.DelPost(post.ID);
+            return RedirectToAction("Index", "Thread", new { Title = post.Thread.Title });
         }
     }
 }
