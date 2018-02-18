@@ -10,17 +10,24 @@ using HTLLBB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using HTLLBB.Models.ThreadViewModels;
+using HTLLBB.Repository;
 
 namespace HTLLBB.Controllers
 {
     [Authorize]
-    public class ThreadController : ApplicationController
+    public class ThreadController : Controller
     {
-        public ThreadController(ApplicationDbContext context,
+        readonly IThreadRepository _repo;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public ThreadController(IThreadRepository repo,
                                 UserManager<ApplicationUser> userManager,
-                                SignInManager<ApplicationUser> signInManager) 
-            : base(context, userManager, signInManager)
+                                SignInManager<ApplicationUser> signInManager)
         {
+            _repo = repo;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // GET: Thread
@@ -29,12 +36,7 @@ namespace HTLLBB.Controllers
         {
             if (string.IsNullOrWhiteSpace(title)) return NotFound();
 
-            Thread thread = await _context.Thread
-                                          .Include((Thread t) => t.Forum)
-                                            .ThenInclude((Forum f) => f.Category)
-                                          .Include((Thread t) => t.Posts)
-                                            .ThenInclude((Post p) => p.Author) 
-                                          .SingleOrDefaultAsync(t => t.Title == title);
+            Thread thread = await _repo.GetThreadByTitle(title);
 
             ApplicationUser user = await _userManager.GetUserAsync(User);
             bool isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
@@ -64,7 +66,7 @@ namespace HTLLBB.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
+                if (await _repo.ThreadExists(model.Title))
                 {
                     ModelState.AddModelError("Title", "A Thread already exist with that title");
                     return View(model);
@@ -85,8 +87,7 @@ namespace HTLLBB.Controllers
                     }
                 };
 
-                _context.Add(thread);
-                await _context.SaveChangesAsync();
+                await _repo.AddThread(thread);
                 return RedirectToAction(nameof(Index), new { Title = thread.Title });
             }
 
@@ -94,15 +95,13 @@ namespace HTLLBB.Controllers
             
         }
 
-        // TODO: 
         // GET: Thread/Edit/5
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var thread = await _context.Thread
-                                       .SingleOrDefaultAsync(m => m.ID == id);
+            Thread thread = await _repo.GetThreadById(id.Value);
             
             if (thread == null) return NotFound();
 
@@ -117,31 +116,19 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, EditViewModel model)
         {
-            Thread threadToUpdate = await _context.Thread
-                                                  .Include(t => t.Forum)
-                                                  .SingleOrDefaultAsync(t => t.ID == id);
+            Thread threadToUpdate = await _repo.GetThreadById(id);
 
             if (threadToUpdate.Title == model.Title)
                 return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
 
-            if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
+            if (await _repo.ThreadExists(model.Title))
                 ModelState.AddModelError("Title", "A Thread already exist with that title");
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    threadToUpdate.Title = model.Title;
-                    _context.Update(threadToUpdate);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ThreadExists(id))
-                        return NotFound();
-
-                }
+                threadToUpdate.Title = model.Title;
+                await _repo.UpdThread(threadToUpdate);
+                return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
             }
 
             return View(model);
@@ -152,18 +139,11 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!id.HasValue) return NotFound();
 
-            var thread = await _context.Thread
-                .Include(t => t.Forum)
-                .SingleOrDefaultAsync(m => m.ID == id);
-            if (thread == null)
-            {
-                return NotFound();
-            }
+            var thread = await _repo.GetThreadById(id.Value);
+
+            if (thread == null) return NotFound();
 
             return View(thread);
         }
@@ -174,18 +154,12 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var thread = await _context.Thread
-                                       .Include(t => t.Forum)
-                                       .SingleOrDefaultAsync(m => m.ID == id);
+            var thread = await _repo.GetThreadById(id);
             String forumName = thread.Forum.Name;
-            _context.Thread.Remove(thread);
-            await _context.SaveChangesAsync();
-            return RedirectToAction("Index", "Forum", new { Name = forumName });
-        }
 
-        private bool ThreadExists(int id)
-        {
-            return _context.Thread.Any(e => e.ID == id);
+            await _repo.DelThread(id);
+
+            return RedirectToAction("Index", "Forum", new { Name = forumName });
         }
     }
 }

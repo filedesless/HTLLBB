@@ -56,6 +56,7 @@ namespace HTLLBB
 
             services.AddTransient<ICategoryRepository, EFCategoryRepository>();
             services.AddTransient<IForumRepository, EFForumRepository>();
+            services.AddTransient<IThreadRepository, EFThreadRepository>();
 
             services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
             services.Configure<RedisConfig>(Configuration.GetSection("Redis"));
