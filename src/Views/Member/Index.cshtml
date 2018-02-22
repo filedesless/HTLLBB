@@ -1,0 +1,21 @@
+@model HTLLBB.Models.MemberViewModels.IndexViewModel
+
+<div class="w3-grey w3-bar w3-xxlarge">
+    <a class="w3-bar-item" asp-controller="Member">Members</a>
+</div>
+
+<hr />
+
+<div class="w3-border w3-margin w3-grey">
+<ul class="w3-ul">
+@foreach (var member in Model.Members) {
+    <li class="w3-bar">
+        <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+        <div class="w3-bar-item">
+            <span class="w3-large">@member.Name</span> <br />
+            <span>Role: @member.Role</span>
+        </div>
+    </li>
+}
+</ul>
+</div>

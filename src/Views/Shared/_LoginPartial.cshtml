@@ -6,6 +6,11 @@
 
 @if (SignInManager.IsSignedIn(User))
 {
+    <ul class="nav navbar-nav">
+        <li>
+            <a asp-area="" asp-controller="Members" asp-action="Index" title="Members">Members</a>
+        </li>
+    </ul>
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>

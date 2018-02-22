@@ -66,5 +66,7 @@
     <Folder Include="Models\PostViewModels\" />
     <Folder Include="Hubs\" />
     <Folder Include="Views\Post\" />
+    <Folder Include="Models\MemberViewModels\" />
+    <Folder Include="Views\Member\" />
   </ItemGroup>
 </Project>
