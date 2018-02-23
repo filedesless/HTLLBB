@@ -15,6 +15,11 @@
             <span class="w3-large">@member.Name</span> <br />
             <span>Role: @member.Role</span>
         </div>
+        @if (Model.IsAdmin) {
+        <div class="w3-bar-item w3-right">
+            <a asp-action="Edit" asp-route-id="@member.Id">Edit</a>
+        </div>
+        }
     </li>
 }
 </ul>

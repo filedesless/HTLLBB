@@ -6,6 +6,7 @@ namespace HTLLBB.Models.MemberViewModels
 {
     public class Member
     {
+        public String Id { get; set; }
         public String Name { get; set; }
         public String Role { get; set; }
     }

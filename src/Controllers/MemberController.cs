@@ -35,6 +35,7 @@ namespace HTLLBB.Controllers
                 String roles = String.Join(", ", await _userManager.GetRolesAsync(user));
                 members.Add(new Member
                 {
+                    Id = user.Id,
                     Name = user.UserName,
                     Role = String.IsNullOrEmpty(roles) ? " - " : roles
                 });
@@ -46,6 +47,68 @@ namespace HTLLBB.Controllers
                 IsAdmin = isAdmin,
                 Members = members
             });
+        }
+
+        // GET /Member/Edit/{id}
+        [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> Edit(String id)
+        {
+            if (String.IsNullOrEmpty(id)) return NotFound();
+
+            ApplicationUser user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            return View(new EditViewModel
+            {
+                UserName = user.UserName,
+                Email = user.Email,
+                Password = ""
+            });
+        }
+
+        // POST /Member/Edit/id
+        [HttpPost]
+        [Authorize(Roles = Roles.Admin)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(String id, EditViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View();
+            
+            if (_context.Users.Any(u => u.UserName == model.UserName && u.Id != id))
+            {
+                ModelState.AddModelError(nameof(model.UserName), "A user already exists with that username");
+                return View();
+            }
+
+            if (_context.Users.Any(u => u.Email == model.Email && u.Id != id))
+            {
+                ModelState.AddModelError(nameof(model.Email), "A user already exists with that email");
+                return View();
+            }
+
+            ApplicationUser user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            user.UserName = model.UserName;
+
+            if (model.Email != user.Email)
+            {
+                String token = await _userManager.GenerateChangeEmailTokenAsync(user, model.Email);
+                await _userManager.ChangeEmailAsync(user, model.Email, token);
+            }
+
+            if (!String.IsNullOrWhiteSpace(model.Password)) 
+            {
+                String token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                await _userManager.ResetPasswordAsync(user, token, model.Password);
+            }
+
+            _context.Update(user);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
