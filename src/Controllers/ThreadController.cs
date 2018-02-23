@@ -13,7 +13,6 @@ using HTLLBB.Models.ThreadViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize]
     public class ThreadController : ApplicationController
     {
         public ThreadController(ApplicationDbContext context,
@@ -94,7 +93,6 @@ namespace HTLLBB.Controllers
             
         }
 
-        // TODO: 
         // GET: Thread/Edit/5
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
