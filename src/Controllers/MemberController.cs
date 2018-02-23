@@ -11,7 +11,6 @@ using System.Linq;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize]
     public class MemberController : ApplicationController
     {
         public MemberController(ApplicationDbContext context, 
@@ -54,7 +53,7 @@ namespace HTLLBB.Controllers
         [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(String id)
         {
-            if (String.IsNullOrEmpty(id)) return NotFound();
+            if (String.IsNullOrWhiteSpace(id)) return NotFound();
 
             ApplicationUser user = await _context.Users.FindAsync(id);
             if (user == null) return NotFound();
@@ -107,6 +106,39 @@ namespace HTLLBB.Controllers
 
             _context.Update(user);
             await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET /Member/Delete/{id}
+        [HttpGet]
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> Delete(String id)
+        {
+            if (String.IsNullOrWhiteSpace(id)) return NotFound();
+
+            ApplicationUser user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            return View(new DeleteViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+            });
+        }
+
+        // POST /Member/Delete/{id}
+        [HttpPost, ActionName("Delete")]
+        [Authorize(Roles = Roles.Admin)]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(String id)
+        {
+            if (String.IsNullOrWhiteSpace(id)) return NotFound();
+
+            ApplicationUser user = await _context.Users.FindAsync(id);
+            if (user == null) return NotFound();
+
+            await _userManager.DeleteAsync(user);
 
             return RedirectToAction(nameof(Index));
         }
