@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize]
     public class ForumController : ApplicationController
     {
         public ForumController(ApplicationDbContext context, 
@@ -49,6 +48,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forum/Create
+        [Authorize(Roles = Roles.Admin)]
         public IActionResult Create(int? id)
         {
             if (id == null) return NotFound();
@@ -61,6 +61,7 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Create(CreateViewModel model)
         {
             if (ModelState.IsValid)

@@ -13,7 +13,6 @@ using HTLLBB.Models.PostViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize]
     public class PostController : ApplicationController
     {
         public PostController(ApplicationDbContext context,
@@ -24,7 +23,6 @@ namespace HTLLBB.Controllers
         }
 
 
-        // TODO: review and check rest
         // POST: Post/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.

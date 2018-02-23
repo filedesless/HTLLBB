@@ -14,7 +14,6 @@ using HTLLBB.Models.CategoryViewModels;
 
 namespace HTLLBB.Controllers
 {
-    [Authorize]
     public class CategoryController : ApplicationController
     {
         public CategoryController(ApplicationDbContext context,
@@ -48,6 +47,7 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Forums/Create
+        [Authorize(Roles = Roles.Admin)]
         public IActionResult Create()
         {
             return View();
@@ -58,6 +58,7 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Create([Bind("Name")] Category category)
         {
             if (ModelState.IsValid)

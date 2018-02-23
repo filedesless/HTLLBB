@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HTLLBB.Data;
 using HTLLBB.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HTLLBB.Controllers
 {
+    [Authorize]
     public class ApplicationController : Controller
     {
         protected readonly ApplicationDbContext _context;
