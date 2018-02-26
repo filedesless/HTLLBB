@@ -35,6 +35,8 @@
     <PackageReference Include="BuildBundlerMinifier" Version="2.6.362" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
+    <PackageReference Include="CommonMark.NET" Version="0.15.1" />
+    <PackageReference Include="HtmlSanitizer" Version="4.0.183" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet">
@@ -68,5 +70,6 @@
     <Folder Include="Views\Post\" />
     <Folder Include="Models\MemberViewModels\" />
     <Folder Include="Views\Member\" />
+    <Folder Include="TagHelpers\" />
   </ItemGroup>
 </Project>

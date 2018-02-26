@@ -16,8 +16,8 @@
             <img src="~/images/no_avatar.jpg" class="w3-image w3-border" style="width: 5em;">
             <p class="w3-small">@post.Author.UserName</p>
         </div>
-        <div class="w3-rest w3-justify">
-            <pre>@post.Content</pre>
+        <div class="w3-rest w3-justify w3-container">
+            <markdown content="@post.Content"></markdown>
         </div>
         <p class="w3-right w3-tiny">
             @if (Model.IsAdmin) {
