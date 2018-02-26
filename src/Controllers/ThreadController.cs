@@ -10,7 +10,8 @@ using HTLLBB.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using HTLLBB.Models.ThreadViewModels;
-q
+using Ganss.XSS;
+
 namespace HTLLBB.Controllers
 {
     public class ThreadController : ApplicationController
