@@ -2,15 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using HTLLBB.Data;
 using HTLLBB.Models;
+using HTLLBB.Models.ThreadViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using HTLLBB.Models.ThreadViewModels;
-using Ganss.XSS;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace HTLLBB.Controllers
 {
@@ -180,6 +178,26 @@ namespace HTLLBB.Controllers
             _context.Thread.Remove(thread);
             await _context.SaveChangesAsync();
             return RedirectToAction("Index", "Forum", new { Name = forumName });
+        }
+
+        [Route("Thread/Search")]
+        public IActionResult Search(String query)
+        {
+            if (String.IsNullOrWhiteSpace(query)) return NotFound();
+
+            List<Thread> threads =
+                _context.Thread
+                        .Include(t => t.Posts)
+                        .AsParallel() // vroom vroom!
+                        .Where(t => t.Title.Contains(query)
+                               || t.Posts.First().Content.Contains(query)
+                               || t.Posts.Any(p => p.Content.Contains(query)))
+                        .OrderByDescending(t => t.Posts.First().CreationTime)
+                        .ToList();
+
+            return View(new SearchViewModel {
+                Threads = threads
+            });
         }
 
         private bool ThreadExists(int id)

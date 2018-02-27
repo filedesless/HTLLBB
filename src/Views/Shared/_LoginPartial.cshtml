@@ -11,6 +11,11 @@
             <a asp-area="" asp-controller="Members" asp-action="Index" title="Members">Members</a>
         </li>
     </ul>
+    <form class="navbar-form navbar-left" method="get" asp-controller="Thread" asp-action="Search" id="searchForm">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="Search thread" name="query">
+        </div>
+    </form>
     <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li>
