@@ -8,7 +8,7 @@
 @Html.Partial("_StatusMessage", Model.StatusMessage)
 <div class="row">
     <div class="col-md-6">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="All" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username"></label>
@@ -29,6 +29,21 @@
                     <button asp-action="SendVerificationEmail" class="btn btn-link">Send verification email</button>
                 }
                 <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+            <label asp-for="CurrentAvatar"></label>
+                @if (String.IsNullOrWhiteSpace(Model.CurrentAvatar))
+                {
+                    <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+                } 
+                else
+                {
+                    <img src="@Model.CurrentAvatar" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+                }
+            </div>
+            <div class="form-group">
+                <label asp-for="NewAvatar"></label>
+                <input asp-for="NewAvatar" />
             </div>
             <button type="submit" class="btn btn-default">Save</button>
         </form>

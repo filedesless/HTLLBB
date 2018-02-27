@@ -13,6 +13,8 @@ using Microsoft.Extensions.Options;
 using HTLLBB.Models;
 using HTLLBB.Models.ManageViewModels;
 using HTLLBB.Services;
+using System.IO;
+using HTLLBB.Data;
 
 namespace HTLLBB.Controllers
 {
@@ -25,16 +27,18 @@ namespace HTLLBB.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
+        private readonly ApplicationDbContext _ctx;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
-        public ManageController(
+        public ManageController(ApplicationDbContext ctx,
           UserManager<ApplicationUser> userManager,
           SignInManager<ApplicationUser> signInManager,
           IEmailSender emailSender,
           ILogger<ManageController> logger,
           UrlEncoder urlEncoder)
         {
+            _ctx = ctx;
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
@@ -59,6 +63,7 @@ namespace HTLLBB.Controllers
                 Username = user.UserName,
                 Email = user.Email,
                 IsEmailConfirmed = user.EmailConfirmed,
+                CurrentAvatar = user.AvatarPath,
                 StatusMessage = StatusMessage
             };
 
@@ -92,6 +97,31 @@ namespace HTLLBB.Controllers
                     user.EmailConfirmed = true;
                     await _userManager.UpdateAsync(user);
                 }
+            }
+
+            if (model.NewAvatar != null && model.NewAvatar.Length > 0)
+            {
+                String path = "uploads";
+                Directory.CreateDirectory(path);
+
+                // generate random filename without collision
+                String ext = Path.GetExtension(model.NewAvatar.FileName);
+                String filename = $"{path}/{Guid.NewGuid().ToString()}{ext}";
+                while (System.IO.File.Exists($"{path}/{filename}"))
+                    filename = $"{path}/{Guid.NewGuid().ToString()}{ext}";
+
+                // save file
+                using (var stream = new FileStream(filename, FileMode.CreateNew))
+                    await model.NewAvatar.CopyToAsync(stream);
+
+                // remove old file
+                if (System.IO.File.Exists(user.AvatarPath))
+    				System.IO.File.Delete(user.AvatarPath);
+
+                // save new path in db
+                user.AvatarPath = filename;
+                _ctx.Update(user);
+                await _ctx.SaveChangesAsync();
             }
 
             StatusMessage = "Your profile has been updated";
