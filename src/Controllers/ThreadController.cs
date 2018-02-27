@@ -190,7 +190,6 @@ namespace HTLLBB.Controllers
                         .Include(t => t.Posts)
                         .AsParallel() // vroom vroom!
                         .Where(t => t.Title.Contains(query)
-                               || t.Posts.First().Content.Contains(query)
                                || t.Posts.Any(p => p.Content.Contains(query)))
                         .OrderByDescending(t => t.Posts.First().CreationTime)
                         .ToList();
