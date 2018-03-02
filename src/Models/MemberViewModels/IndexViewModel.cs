@@ -9,6 +9,7 @@ namespace HTLLBB.Models.MemberViewModels
         public String Id { get; set; }
         public String Name { get; set; }
         public String Role { get; set; }
+        public String Avatar { get; set; }
     }
 
     public class IndexViewModel

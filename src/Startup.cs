@@ -55,6 +55,7 @@ namespace HTLLBB
 
             services.Configure<SmtpConfig>(Configuration.GetSection("Smtp"));
             services.Configure<RedisConfig>(Configuration.GetSection("Redis"));
+            services.Configure<UploadConfig>(Configuration.GetSection("Upload"));
 
             services.AddSignalR();
 

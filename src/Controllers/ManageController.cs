@@ -28,6 +28,7 @@ namespace HTLLBB.Controllers
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
         private readonly ApplicationDbContext _ctx;
+        private readonly UploadConfig _cfg;
 
         private const string AuthenicatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
@@ -36,7 +37,8 @@ namespace HTLLBB.Controllers
           SignInManager<ApplicationUser> signInManager,
           IEmailSender emailSender,
           ILogger<ManageController> logger,
-          UrlEncoder urlEncoder)
+          UrlEncoder urlEncoder,
+          IOptions<UploadConfig> cfg)
         {
             _ctx = ctx;
             _userManager = userManager;
@@ -44,6 +46,7 @@ namespace HTLLBB.Controllers
             _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
+            _cfg = cfg.Value;
         }
 
         [TempData]
@@ -101,22 +104,23 @@ namespace HTLLBB.Controllers
 
             if (model.NewAvatar != null && model.NewAvatar.Length > 0)
             {
-                String path = "uploads";
-                Directory.CreateDirectory(path);
+                String root = _cfg.Root, dir = _cfg.Dir;
+                Directory.CreateDirectory($"{root}/{dir}");
 
                 // generate random filename without collision
                 String ext = Path.GetExtension(model.NewAvatar.FileName);
-                String filename = $"{path}/{Guid.NewGuid().ToString()}{ext}";
-                while (System.IO.File.Exists($"{path}/{filename}"))
-                    filename = $"{path}/{Guid.NewGuid().ToString()}{ext}";
+                String filename = $"{dir}/{Guid.NewGuid().ToString()}{ext}";
+                while (System.IO.File.Exists($"{root}/{dir}/{filename}"))
+                    filename = $"{dir}/{Guid.NewGuid().ToString()}{ext}";
 
                 // save file
-                using (var stream = new FileStream(filename, FileMode.CreateNew))
+                using (var stream = new FileStream($"{root}/{filename}", FileMode.CreateNew))
                     await model.NewAvatar.CopyToAsync(stream);
 
                 // remove old file
-                if (System.IO.File.Exists(user.AvatarPath))
-    				System.IO.File.Delete(user.AvatarPath);
+                String oldFile = $"{root}/{user.AvatarPath}";
+                if (System.IO.File.Exists(oldFile))
+                    System.IO.File.Delete(oldFile);
 
                 // save new path in db
                 user.AvatarPath = filename;

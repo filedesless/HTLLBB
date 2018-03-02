@@ -10,7 +10,13 @@
 <ul class="w3-ul">
 @foreach (var member in Model.Members) {
     <li class="w3-bar">
-        <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+        @if (String.IsNullOrWhiteSpace(member.Avatar))
+        {
+            <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+        } else
+        {
+            <img src="~/@member.Avatar" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+        }
         <div class="w3-bar-item">
             <span class="w3-large">@member.Name</span> <br />
             <span>Role: @member.Role</span>

@@ -36,7 +36,8 @@ namespace HTLLBB.Controllers
                 {
                     Id = user.Id,
                     Name = user.UserName,
-                    Role = String.IsNullOrEmpty(roles) ? " - " : roles
+                    Role = String.IsNullOrEmpty(roles) ? " - " : roles,
+                    Avatar = user.AvatarPath
                 });
             }
                 

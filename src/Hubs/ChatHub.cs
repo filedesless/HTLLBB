@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
+using HTLLBB.Data;
 using HTLLBB.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 namespace HTLLBB.Hubs
@@ -14,11 +16,13 @@ namespace HTLLBB.Hubs
         IDatabase _db;
         String _msgKey = "chatbox_msg", _usrKey = "chatbox_user";
         long _maxLength = 1024;
+        ApplicationDbContext _ctx;
 
-        public ChatHub(IRedisConnection redis)
+        public ChatHub(IRedisConnection redis, ApplicationDbContext ctx)
         {
             _redis = redis.GetInstance();
             _db = _redis.GetDatabase();
+            _ctx = ctx;
         }
 
         [Authorize]
@@ -28,7 +32,11 @@ namespace HTLLBB.Hubs
             var messages = await _db.ListRangeAsync(_msgKey);
 
             for (int i = 0; i < users.Length && i < messages.Length; ++i)
-                await Clients.All.InvokeAsync("Send", users[i].ToString(), messages[i].ToString());
+            {
+                String userName = users[i].ToString();
+                var user = await _ctx.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+				await Clients.All.InvokeAsync("Send", userName, user.AvatarPath, messages[i].ToString());
+            }
         }
 
         [Authorize]
@@ -45,7 +53,10 @@ namespace HTLLBB.Hubs
                 await _db.ListLeftPopAsync(_msgKey);
             }
 
-            return Clients.All.InvokeAsync("Send", Context.User.Identity.Name, message);
+            String userName = Context.User.Identity.Name;
+            var user = await _ctx.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+
+            return Clients.All.InvokeAsync("Send", userName, user.AvatarPath, message);
         }
     }
 }
