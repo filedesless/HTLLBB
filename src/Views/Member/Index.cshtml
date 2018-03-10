@@ -12,10 +12,10 @@
     <li class="w3-bar">
         @if (String.IsNullOrWhiteSpace(member.Avatar))
         {
-            <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+            <img src="~/images/no_avatar.jpg" class="w3-image w3-bar-item" style="width: 5em;">
         } else
         {
-            <img src="~/@member.Avatar" class="w3-image w3-bar-item w3-circle" style="width: 5em;">
+            <img src="~/@member.Avatar" class="w3-image w3-bar-item" style="width: 5em;">
         }
         <div class="w3-bar-item">
             <span class="w3-large">@member.Name</span> <br />

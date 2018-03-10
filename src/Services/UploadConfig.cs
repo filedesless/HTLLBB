@@ -5,5 +5,6 @@ namespace HTLLBB.Services
     {
         public String Root { get; set; }
         public String Dir { get; set; }
+        public float MaxSize { get; set; } // In MB
     }
 }

@@ -104,6 +104,13 @@ namespace HTLLBB.Controllers
 
             if (model.NewAvatar != null && model.NewAvatar.Length > 0)
             {
+                float lenInMB = (float)model.NewAvatar.Length / 1024 / 1024;
+                if (lenInMB > _cfg.MaxSize)
+                {
+                    ModelState.AddModelError(nameof(model.NewAvatar), $"Avatar cannot be more than {_cfg.MaxSize} MB");
+                    return View(model);
+                }
+
                 String root = _cfg.Root, dir = _cfg.Dir;
                 Directory.CreateDirectory($"{root}/{dir}");
 

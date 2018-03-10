@@ -41,7 +41,7 @@
         connection.on('send', (name, avatar, message) => {
             let usr = `<b>${name}</b>`;
             let txt = $('<div />').text(message).html();
-            let img = `<img src="${path}${avatar}" class="w3-circle w3-bar-item" style="width: 55px"></img>`;
+            let img = `<img src="${path}${avatar}" class="w3-bar-item" style="width: 55px"></img>`;
             let div = `<div class="w3-bar">${img}<span class="w3-bar-item" style="padding-left: 0px;">${usr}: ${txt}</span></div>`;
             $('#DisplayMessages')
                 .append(div)
