@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using HTLLBB.Data;
 using HTLLBB.Models;
-using HTLLBB.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace HTLLBB.Hubs
 {
@@ -14,6 +13,7 @@ namespace HTLLBB.Hubs
     public class ChatHub : Hub
     {
         ApplicationDbContext _ctx;
+        readonly int messageNumber = 1024;
 
         public ChatHub(ApplicationDbContext ctx)
         {
@@ -55,6 +55,9 @@ namespace HTLLBB.Hubs
                 Timestamp = curTime,
                 Content = message,
             });
+
+            if (channel.Messages.Count > messageNumber)
+                channel.Messages.RemoveRange(0, messageNumber / 2);
 
             await _ctx.SaveChangesAsync();
 
