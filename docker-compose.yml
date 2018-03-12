@@ -8,7 +8,6 @@ services:
       dockerfile: Dockerfile
     depends_on:
         - mysql
-        - redis
     restart: always
     ports:
       - 5000:5000
@@ -18,10 +17,6 @@ services:
       ASPNETCORE_URLS: "http://*:5000"
       ASPNETCORE_ENVIRONMENT: "Production"
     command: ["./wait-for-it.sh", "mysql:3306", "-t", "0", "--", "dotnet", "src.dll"]
-
-  redis:
-    image: redis:alpine
-    restart: always
 
   mysql:
     image: mysql

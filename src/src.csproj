@@ -54,6 +54,9 @@
     <Compile Remove="Data\Migrations\20180101071435_ForumBase.Designer.cs" />
     <Compile Remove="Data\ForumContext.cs" />
     <Compile Remove="Data\Migrations\00000000000000_CreateIdentitySchema.cs" />
+    <Compile Remove="Services\IRedisConnection.cs" />
+    <Compile Remove="Services\RedisConfig.cs" />
+    <Compile Remove="Services\RedisConnection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="app" />
