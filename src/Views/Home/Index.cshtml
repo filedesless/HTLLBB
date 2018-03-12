@@ -38,11 +38,13 @@
         let connection = new signalR.HubConnection('/chat');
         let path = `@Url.Content("~/")`;
 
-        connection.on('send', (name, avatar, message) => {
+        connection.on('send', (name, avatar, curTime, message) => {
+            let date = new Date(curTime + " UTC");
+            let time = `<span class="w3-tiny w3-right w3-bar-item">${date.getMonth()}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</span>`;
             let usr = `<b>${name}</b>`;
-            let txt = $('<div />').text(message).html();
+            let txt = $('<div />').text(message).text();
             let img = `<img src="${path}${avatar || 'images/no_avatar.jpg'}" class="w3-bar-item" style="width: 55px"></img>`;
-            let div = `<div class="w3-bar">${img}<span class="w3-bar-item" style="padding-left: 0px;">${usr}: ${txt}</span></div>`;
+            let div = `<div class="w3-bar">${img}<span class="w3-bar-item" style="padding-left: 0px;">${usr}: ${txt}</span>${time}</div>`;
             $('#DisplayMessages')
                 .append(div)
                 .scrollTop($('#DisplayMessages').prop('scrollHeight'));
