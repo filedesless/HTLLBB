@@ -39,5 +39,7 @@ namespace HTLLBB.Data
         public DbSet<Forum> Forums { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Thread> Thread { get; set; }
+        public DbSet<ChatboxChannel> ChatboxChannels { get; set; }
+        public DbSet<ChatboxMessage> ChatboxMessages { get; set; }
     }
 }
