@@ -40,7 +40,11 @@
 
         connection.on('send', (name, avatar, curTime, message) => {
             let date = new Date(curTime + " UTC");
-            let time = `<span class="w3-tiny w3-right w3-bar-item">${date.getMonth()}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}</span>`;
+            let month = date.getMonth().toString().padStart(2, "0");
+            let day = date.getDate().toString().padStart(2, "0");
+            let hours = date.getHours().toString().padStart(2, "0");
+            let min = date.getMinutes().toString().padStart(2, "0");
+            let time = `<span class="w3-tiny w3-right w3-bar-item">${month}/${day} ${hours}:${min}</span>`;
             let usr = `<b>${name}</b>`;
             let txt = $('<div />').text(message).text();
             let img = `<img src="${path}${avatar || 'images/no_avatar.jpg'}" class="w3-bar-item" style="width: 55px"></img>`;
@@ -51,11 +55,11 @@
         });
 
         connection.start()
-            .then(() => connection.invoke('RetrieveMessages'));
+            .then(() => connection.invoke('RetrieveMessages', 1));
             
         function SendMessage(){
             var msg = document.getElementById("txtMessage");
-            connection.invoke('send', msg.value);
+            connection.invoke('send', msg.value, 1);
             msg.value = "";
             return false;
         }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HTLLBB.Models;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +16,8 @@ namespace HTLLBB.Data
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+            var ctx = serviceProvider.GetRequiredService<ApplicationDbContext>();
+
             if (! roleManager.RoleExistsAsync(Roles.Admin).Result )
                 roleManager.CreateAsync(new IdentityRole { Name = Roles.Admin }).Wait();
 
@@ -26,6 +30,18 @@ namespace HTLLBB.Data
                 };
                 userManager.CreateAsync(user, "Password123!").Wait();
                 userManager.AddToRoleAsync(user, Roles.Admin).Wait();
+            }
+
+            if (! ctx.ChatboxChannels.Any(c => c.ID == 1))
+            {
+                ctx.ChatboxChannels.Add(new ChatboxChannel
+                {
+                    ID = 1,
+                    Topic = "General",
+                    Messages = new List<ChatboxMessage>(),
+                });
+
+                ctx.SaveChanges();
             }
         }
     }

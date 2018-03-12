@@ -1,71 +1,64 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using CommonMark;
-using Ganss.XSS;
 using HTLLBB.Data;
+using HTLLBB.Models;
 using HTLLBB.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
 
 namespace HTLLBB.Hubs
 {
     [Authorize]
     public class ChatHub : Hub
     {
-        ConnectionMultiplexer _redis;
-        IDatabase _db;
-        String  _msgKey = "chatbox_msg", 
-                _usrKey = "chatbox_user",
-                _timeKey = "chatbox_time";
-        long _maxLength = 1024;
         ApplicationDbContext _ctx;
 
-        public ChatHub(IRedisConnection redis, ApplicationDbContext ctx)
+        public ChatHub(ApplicationDbContext ctx)
         {
-            _redis = redis.GetInstance();
-            _db = _redis.GetDatabase();
             _ctx = ctx;
         }
 
         [Authorize]
-        public async Task RetrieveMessages()
+        public async Task RetrieveMessages(int channelId)
         {
-            var users = await _db.ListRangeAsync(_usrKey);
-            var times = await _db.ListRangeAsync(_timeKey);
-            var messages = await _db.ListRangeAsync(_msgKey);
+            var channel = await _ctx.ChatboxChannels
+                                    .Include(c => c.Messages)
+                                        .ThenInclude(m => m.Author)
+                                    .FirstAsync(c => c.ID == channelId);
 
-            for (int i = 0; i < users.Length && i < messages.Length; ++i)
-            {
-                String userName = users[i].ToString();
-                var user = await _ctx.Users.SingleOrDefaultAsync(u => u.UserName == userName);
-                await Clients.All.InvokeAsync("Send", userName, user.AvatarPath, times[i].ToString(), messages[i].ToString());
-            }
+            foreach (var message in channel.Messages) 
+                await Clients.All.InvokeAsync(
+                    "Send",
+                    message.Author.UserName,
+                    message.Author.AvatarPath,
+                    message.Timestamp.ToString(),
+                    message.Content
+                );
         }
 
         [Authorize]
-        public async Task<Task> Send(string message)
+        public async Task Send(string message, int channelId)
         {
-            long n = _db.ListLength(_usrKey);
-
-            var curTime = DateTime.UtcNow.ToString();
-
-            await _db.ListRightPushAsync(_usrKey, Context.User.Identity.Name);
-            await _db.ListRightPushAsync(_timeKey, curTime);
-            await _db.ListRightPushAsync(_msgKey, message);
-
-            if (n >= _maxLength)
-            {
-                await _db.ListLeftPopAsync(_usrKey);
-                await _db.ListLeftPopAsync(_timeKey);
-                await _db.ListLeftPopAsync(_msgKey);
-            }
-
+            var channel = await _ctx.ChatboxChannels
+                                    .Include(c => c.Messages)
+                                    .FirstAsync(c => c.ID == channelId);
+            
             String userName = Context.User.Identity.Name;
             var user = await _ctx.Users.SingleOrDefaultAsync(u => u.UserName == userName);
+            var curTime = DateTime.UtcNow;
 
-            return Clients.All.InvokeAsync("Send", userName, user.AvatarPath, curTime, message);
+            channel.Messages.Add(new ChatboxMessage
+            {
+                Author = user,
+                Timestamp = curTime,
+                Content = message,
+            });
+
+            await _ctx.SaveChangesAsync();
+
+            await Clients.All.InvokeAsync("Send", userName, user.AvatarPath, curTime.ToString(),  message);
         }
     }
 }
