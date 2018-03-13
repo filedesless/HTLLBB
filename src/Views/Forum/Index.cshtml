@@ -12,6 +12,7 @@
 <hr />
 
 @foreach (var thread in Model.Forum.Threads) {
+    var firstPost = thread.Posts.First();
     <div class="w3-border w3-margin w3-grey">
         <div class="w3-blue-grey w3-bar">
             <div class="w3-bar-item w3-xlarge">
@@ -19,10 +20,10 @@
             </div>
             <div class="w3-bar-item">
                 <a style="font-weight: bold;" asp-controller="Thread" asp-route-title="@thread.Title">@thread.Title</a><br />
-                <span class="w3-tiny" style="font-style: italic;">By @thread.Posts.First().Author, </span>
-                <span class="w3-tiny" style="font-style: italic; font-weight: bold;">@thread.Posts.First().CreationTime</span>
+                <span class="w3-tiny" style="font-style: italic;">By @firstPost.Author, </span>
+                <span class="w3-tiny" style="font-style: italic; font-weight: bold;">@firstPost.CreationTime</span>
             </div>
-            @if (Model.IsAdmin) {
+            @if (Model.IsAdmin || Model.UserId == firstPost.Author.Id) {
                 <div class="w3-right w3-bar-item ">
                     <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Thread" asp-action="Edit" asp-route-id="@thread.ID">
                         <span class="w3-small"><i class="glyphicon glyphicon-edit w3-text-yellow"></i></span>

@@ -38,13 +38,15 @@ namespace HTLLBB.Controllers
             if (forum == null) return NotFound();
 
             bool isAdmin = false;
+            String userId = null;
             if (_signInManager.IsSignedIn(User))
             {
                 ApplicationUser user = await _userManager.GetUserAsync(User);
                 isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
+                userId = user.Id;
             }
 
-            return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin });
+            return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin, UserId = userId });
         }
 
         // GET: Forum/Create

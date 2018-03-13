@@ -93,15 +93,16 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Thread/Edit/5
-        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null) return NotFound();
+            if (!id.HasValue) return NotFound();
 
-            var thread = await _context.Thread
-                                       .SingleOrDefaultAsync(m => m.ID == id);
-            
+            var thread = await _context.Thread.FindAsync(id.Value);
+
             if (thread == null) return NotFound();
+
+            if (!await HasEditRight(id.Value)) return Forbid();
+
 
             return View(new EditViewModel { Title = thread.Title });
         }
@@ -111,9 +112,10 @@ namespace HTLLBB.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Edit(int id, EditViewModel model)
         {
+            if (!await HasEditRight(id)) return Forbid();
+
             Thread threadToUpdate = await _context.Thread
                                                   .Include(t => t.Forum)
                                                   .SingleOrDefaultAsync(t => t.ID == id);
@@ -146,21 +148,17 @@ namespace HTLLBB.Controllers
         }
 
         // GET: Thread/Delete/5
-        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!id.HasValue) return NotFound();
 
             var thread = await _context.Thread
                 .Include(t => t.Forum)
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if (thread == null)
-            {
-                return NotFound();
-            }
+            
+            if (thread == null) return NotFound();
+
+            if (!await HasEditRight(id.Value)) return Forbid();
 
             return View(thread);
         }
@@ -168,15 +166,18 @@ namespace HTLLBB.Controllers
         // POST: Thread/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+            if (!await HasEditRight(id)) return Forbid();
+
             var thread = await _context.Thread
                                        .Include(t => t.Forum)
                                        .SingleOrDefaultAsync(m => m.ID == id);
+            
             String forumName = thread.Forum.Name;
             _context.Thread.Remove(thread);
             await _context.SaveChangesAsync();
+
             return RedirectToAction("Index", "Forum", new { Name = forumName });
         }
 
@@ -197,6 +198,24 @@ namespace HTLLBB.Controllers
             return View(new SearchViewModel {
                 Threads = threads
             });
+        }
+
+        private async Task<bool> HasEditRight(int id) 
+        {
+            var thread = await _context.Thread
+                           .Include(t => t.Posts)
+                               .ThenInclude(p => p.Author)
+                           .SingleOrDefaultAsync(m => m.ID == id);
+
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+
+            if (user.Id == thread.Posts.First().Author.Id)
+                return true;
+
+            if (await _userManager.IsInRoleAsync(user, Roles.Admin))
+                return true;
+
+            return false;
         }
 
         private bool ThreadExists(int id)

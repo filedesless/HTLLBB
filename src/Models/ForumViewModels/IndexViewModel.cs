@@ -12,5 +12,7 @@ namespace HTLLBB.Models.ForumViewModels
         public bool IsAdmin { get; set; }
         [Required]
         public Forum Forum { get; set; }
+        [Required]
+        public String UserId { get; set; }
     }
 }
