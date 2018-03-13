@@ -202,17 +202,18 @@ namespace HTLLBB.Controllers
 
         private async Task<bool> HasEditRight(int id) 
         {
-            var thread = await _context.Thread
-                           .Include(t => t.Posts)
-                               .ThenInclude(p => p.Author)
-                           .SingleOrDefaultAsync(m => m.ID == id);
 
             ApplicationUser user = await _userManager.GetUserAsync(User);
 
-            if (user.Id == thread.Posts.First().Author.Id)
+            if (await _userManager.IsInRoleAsync(user, Roles.Admin))
                 return true;
 
-            if (await _userManager.IsInRoleAsync(user, Roles.Admin))
+            var thread = await _context.Thread
+               .Include(t => t.Posts)
+                   .ThenInclude(p => p.Author)
+               .SingleOrDefaultAsync(m => m.ID == id);
+
+            if (user.Id == thread.Posts.First().Author.Id)
                 return true;
 
             return false;
