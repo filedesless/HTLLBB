@@ -34,12 +34,15 @@ namespace HTLLBB.Controllers
                                             .ThenInclude((Post p) => p.Author) 
                                           .SingleOrDefaultAsync(t => t.Title == title);
 
+            thread.Posts = thread.Posts.OrderBy(p => p.CreationTime).ToList();
+
             ApplicationUser user = await _userManager.GetUserAsync(User);
             bool isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
+            String userId = user.Id;
 
             if (thread == null) return NotFound();
 
-            return View(new IndexViewModel { Thread = thread, IsAdmin = isAdmin });
+            return View(new IndexViewModel { Thread = thread, IsAdmin = isAdmin, UserId = userId });
         }
 
         // GET: Thread/Create

@@ -35,16 +35,13 @@ namespace HTLLBB.Controllers
                                             .ThenInclude(p => p.Author)
                                         .SingleOrDefaultAsync(f => f.Name == name);
 
+            forum.Threads = forum.Threads.OrderBy(t => t.ID).ToList();
+
             if (forum == null) return NotFound();
 
-            bool isAdmin = false;
-            String userId = null;
-            if (_signInManager.IsSignedIn(User))
-            {
-                ApplicationUser user = await _userManager.GetUserAsync(User);
-                isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
-                userId = user.Id;
-            }
+            ApplicationUser user = await _userManager.GetUserAsync(User);
+            bool isAdmin = await _userManager.IsInRoleAsync(user, Roles.Admin);
+            String userId = user.Id;
 
             return View(new IndexViewModel { Forum = forum, IsAdmin = isAdmin, UserId = userId });
         }

@@ -26,7 +26,7 @@
             <markdown content="@post.Content"></markdown>
         </div>
         <p class="w3-right w3-tiny">
-            @if (Model.IsAdmin) {
+            @if (Model.IsAdmin || post.Author.Id == Model.UserId) {
                 <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Edit" asp-route-id="@post.ID">Edit</a>
                 <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Post" asp-action="Delete" asp-route-id="@post.ID">Delete</a>
             }
