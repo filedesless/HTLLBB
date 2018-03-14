@@ -10,5 +10,8 @@ namespace HTLLBB.Models.ThreadViewModels
         [Required]
         [RegularExpression("[^/]+", ErrorMessage = "The field Title must not contain slashes")]
         public String Title { get; set; }
+
+        [Required]
+        public String Content { get; set; }
     }
 }

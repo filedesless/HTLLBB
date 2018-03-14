@@ -30,7 +30,7 @@ namespace HTLLBB.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateViewModel model)
         {
-            Thread thread = await _context.Thread
+            Thread thread = await _context.Threads
                               .SingleOrDefaultAsync(t => t.ID == model.ThreadID);
 
             if (ModelState.IsValid)
@@ -130,31 +130,15 @@ namespace HTLLBB.Controllers
                                      .Include(p => p.Thread)
                                      .SingleOrDefaultAsync(m => m.ID == id);
 
-            var thread = await _context.Thread
+            var thread = await _context.Threads
                                        .Include(t => t.Posts)
                                        .Include(t => t.Forum)
                                        .SingleOrDefaultAsync(t => t.ID == post.ThreadId);
+           
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
 
-            var firstPost = thread.Posts
-                                .OrderBy(p => p.CreationTime)
-                                .First();
-
-            // deleting first post deletes thread
-            if (post.ID == firstPost.ID)
-            {
-                _context.Thread.Remove(post.Thread);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Index", "Forum", new { Name = thread.Forum.Name });
-
-            } else
-            {
-                _context.Posts.Remove(post);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Index", "Thread", new { Title = post.Thread.Title });
-            }
-
+            return RedirectToAction("Index", "Thread", new { Title = post.Thread.Title });
         }
 
         private async Task<bool> HasEditRight(int id) 

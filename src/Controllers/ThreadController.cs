@@ -27,7 +27,8 @@ namespace HTLLBB.Controllers
         {
             if (string.IsNullOrWhiteSpace(title)) return NotFound();
 
-            Thread thread = await _context.Thread
+            Thread thread = await _context.Threads
+                                          .Include((Thread t) => t.Author)
                                           .Include((Thread t) => t.Forum)
                                             .ThenInclude((Forum f) => f.Category)
                                           .Include((Thread t) => t.Posts)
@@ -65,7 +66,7 @@ namespace HTLLBB.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
+                if (await _context.Threads.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
                 {
                     ModelState.AddModelError("Title", "A Thread already exist with that title");
                     return View(model);
@@ -75,15 +76,10 @@ namespace HTLLBB.Controllers
                 {
                     ForumId = model.ForumID,
                     Title = model.Title,
-                    Posts = new List<Post>
-                    {
-                        new Post
-                        {
-                            Author = await _userManager.GetUserAsync(User),
-                            Content = model.Content,
-                            CreationTime = DateTime.UtcNow
-                        }
-                    }
+                    Author = await _userManager.GetUserAsync(User),
+                    Content = model.Content,
+                    CreationTime = DateTime.UtcNow,
+                    Posts = new List<Post>(),
                 };
 
                 _context.Add(thread);
@@ -92,7 +88,6 @@ namespace HTLLBB.Controllers
             }
 
             return View(model);
-            
         }
 
         // GET: Thread/Edit/5
@@ -100,14 +95,14 @@ namespace HTLLBB.Controllers
         {
             if (!id.HasValue) return NotFound();
 
-            var thread = await _context.Thread.FindAsync(id.Value);
+            var thread = await _context.Threads.FindAsync(id.Value);
 
             if (thread == null) return NotFound();
 
             if (!await HasEditRight(id.Value)) return Forbid();
 
 
-            return View(new EditViewModel { Title = thread.Title });
+            return View(new EditViewModel { Title = thread.Title, Content = thread.Content });
         }
 
         // POST: Thread/Edit/5
@@ -119,14 +114,12 @@ namespace HTLLBB.Controllers
         {
             if (!await HasEditRight(id)) return Forbid();
 
-            Thread threadToUpdate = await _context.Thread
+            Thread threadToUpdate = await _context.Threads
                                                   .Include(t => t.Forum)
                                                   .SingleOrDefaultAsync(t => t.ID == id);
 
-            if (threadToUpdate.Title == model.Title)
-                return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
-
-            if (await _context.Thread.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
+            if (threadToUpdate.Title != model.Title &&
+                await _context.Threads.CountAsync((Thread arg) => arg.Title == model.Title) > 0)
                 ModelState.AddModelError("Title", "A Thread already exist with that title");
 
             if (ModelState.IsValid)
@@ -134,6 +127,7 @@ namespace HTLLBB.Controllers
                 try
                 {
                     threadToUpdate.Title = model.Title;
+                    threadToUpdate.Content = model.Content;
                     _context.Update(threadToUpdate);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index", "Forum", new { Name = threadToUpdate.Forum.Name });
@@ -155,7 +149,7 @@ namespace HTLLBB.Controllers
         {
             if (!id.HasValue) return NotFound();
 
-            var thread = await _context.Thread
+            var thread = await _context.Threads
                 .Include(t => t.Forum)
                 .SingleOrDefaultAsync(m => m.ID == id);
             
@@ -173,12 +167,12 @@ namespace HTLLBB.Controllers
         {
             if (!await HasEditRight(id)) return Forbid();
 
-            var thread = await _context.Thread
+            var thread = await _context.Threads
                                        .Include(t => t.Forum)
                                        .SingleOrDefaultAsync(m => m.ID == id);
             
             String forumName = thread.Forum.Name;
-            _context.Thread.Remove(thread);
+            _context.Threads.Remove(thread);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", "Forum", new { Name = forumName });
@@ -190,12 +184,14 @@ namespace HTLLBB.Controllers
             if (String.IsNullOrWhiteSpace(query)) return NotFound();
 
             List<Thread> threads =
-                _context.Thread
+                _context.Threads
+                        .Include(t => t.Author)
                         .Include(t => t.Posts)
                         .AsParallel() // vroom vroom!
                         .Where(t => t.Title.Contains(query)
-                               || t.Posts.Any(p => p.Content.Contains(query)))
-                        .OrderByDescending(t => t.Posts.First().CreationTime)
+                               || t.Posts.Any(p => p.Content.Contains(query))
+                               || t.Content.Contains(query))
+                        .OrderByDescending(t => t.CreationTime)
                         .ToList();
 
             return View(new SearchViewModel {
@@ -211,12 +207,11 @@ namespace HTLLBB.Controllers
             if (await _userManager.IsInRoleAsync(user, Roles.Admin))
                 return true;
 
-            var thread = await _context.Thread
-               .Include(t => t.Posts)
-                   .ThenInclude(p => p.Author)
-               .SingleOrDefaultAsync(m => m.ID == id);
+            var thread = await _context.Threads
+                                       .Include(t => t.Author)
+                                       .SingleOrDefaultAsync(t => t.ID == id);
 
-            if (user.Id == thread.Posts.First().Author.Id)
+            if (user.Id == thread.Author.Id)
                 return true;
 
             return false;
@@ -224,7 +219,7 @@ namespace HTLLBB.Controllers
 
         private bool ThreadExists(int id)
         {
-            return _context.Thread.Any(e => e.ID == id);
+            return _context.Threads.Any(e => e.ID == id);
         }
     }
 }

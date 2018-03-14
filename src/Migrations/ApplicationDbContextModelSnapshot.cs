@@ -173,6 +173,14 @@ namespace HTLLBB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AuthorId")
+                        .IsRequired();
+
+                    b.Property<string>("Content")
+                        .IsRequired();
+
+                    b.Property<DateTime>("CreationTime");
+
                     b.Property<int>("ForumId");
 
                     b.Property<string>("Title")
@@ -180,12 +188,14 @@ namespace HTLLBB.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("ForumId");
 
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Thread");
+                    b.ToTable("Threads");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -331,6 +341,11 @@ namespace HTLLBB.Migrations
 
             modelBuilder.Entity("HTLLBB.Models.Thread", b =>
                 {
+                    b.HasOne("HTLLBB.Models.ApplicationUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("HTLLBB.Models.Forum", "Forum")
                         .WithMany("Threads")
                         .HasForeignKey("ForumId")

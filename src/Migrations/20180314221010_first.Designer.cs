@@ -11,8 +11,8 @@ using System;
 namespace HTLLBB.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20180227183754_AvatarPath")]
-    partial class AvatarPath
+    [Migration("20180314221010_first")]
+    partial class first
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -86,6 +86,45 @@ namespace HTLLBB.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("HTLLBB.Models.ChatboxChannel", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Topic")
+                        .IsRequired();
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ChatboxChannels");
+                });
+
+            modelBuilder.Entity("HTLLBB.Models.ChatboxMessage", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("AuthorId");
+
+                    b.Property<string>("AuthorId1")
+                        .IsRequired();
+
+                    b.Property<int>("ChannelId");
+
+                    b.Property<string>("Content")
+                        .IsRequired();
+
+                    b.Property<DateTime>("Timestamp");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AuthorId1");
+
+                    b.HasIndex("ChannelId");
+
+                    b.ToTable("ChatboxMessages");
+                });
+
             modelBuilder.Entity("HTLLBB.Models.Forum", b =>
                 {
                     b.Property<int>("ID")
@@ -135,6 +174,14 @@ namespace HTLLBB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<string>("AuthorId")
+                        .IsRequired();
+
+                    b.Property<string>("Content")
+                        .IsRequired();
+
+                    b.Property<DateTime>("CreationTime");
+
                     b.Property<int>("ForumId");
 
                     b.Property<string>("Title")
@@ -142,12 +189,14 @@ namespace HTLLBB.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("AuthorId");
+
                     b.HasIndex("ForumId");
 
                     b.HasIndex("Title")
                         .IsUnique();
 
-                    b.ToTable("Thread");
+                    b.ToTable("Threads");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -257,6 +306,19 @@ namespace HTLLBB.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("HTLLBB.Models.ChatboxMessage", b =>
+                {
+                    b.HasOne("HTLLBB.Models.ApplicationUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId1")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("HTLLBB.Models.ChatboxChannel", "Channel")
+                        .WithMany("Messages")
+                        .HasForeignKey("ChannelId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("HTLLBB.Models.Forum", b =>
                 {
                     b.HasOne("HTLLBB.Models.Category", "Category")
@@ -280,6 +342,11 @@ namespace HTLLBB.Migrations
 
             modelBuilder.Entity("HTLLBB.Models.Thread", b =>
                 {
+                    b.HasOne("HTLLBB.Models.ApplicationUser", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("HTLLBB.Models.Forum", "Forum")
                         .WithMany("Threads")
                         .HasForeignKey("ForumId")

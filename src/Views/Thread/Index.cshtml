@@ -10,6 +10,28 @@
 
 <hr />
 
+<div class="w3-row-padding w3-border w3-dark-grey" style="padding: 1em 1em .5em .5em; margin: 1em 0em;">
+    <div class="w3-center w3-col" style="width: 6em; ">
+        @if (String.IsNullOrEmpty(Model.Thread.Author.AvatarPath))
+        {
+            <img src="~/images/no_avatar.jpg" class="w3-image w3-border" style="width: 5em;">
+        } else 
+        {
+            <img src="~/@Model.Thread.Author.AvatarPath" class="w3-image w3-border" style="width: 5em;">
+        }
+        <p class="w3-small">@Model.Thread.Author.UserName</p>
+    </div>
+    <div class="w3-rest w3-justify w3-container">
+        <markdown content="@Model.Thread.Content"></markdown>
+    </div>
+    <p class="w3-right w3-tiny">
+        @if (Model.IsAdmin || Model.Thread.Author.Id == Model.UserId) {
+            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Thread" asp-action="Edit" asp-route-id="@Model.Thread.ID">Edit</a>
+            <a class="w3-button w3-dark-grey w3-bar-item" asp-controller="Thread" asp-action="Delete" asp-route-id="@Model.Thread.ID">Delete</a>
+        }
+    </p>
+</div>
+
 @foreach (var post in Model.Thread.Posts) {
     <div class="w3-row-padding w3-border w3-dark-grey" style="padding: 1em 1em .5em .5em; margin: 1em 0em;">
         <div class="w3-center w3-col" style="width: 6em; ">

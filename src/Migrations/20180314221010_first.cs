@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace HTLLBB.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class first : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -29,6 +29,7 @@ namespace HTLLBB.Migrations
                 {
                     Id = table.Column<string>(nullable: false),
                     AccessFailedCount = table.Column<int>(nullable: false),
+                    AvatarPath = table.Column<string>(nullable: true),
                     ConcurrencyStamp = table.Column<string>(nullable: true),
                     Email = table.Column<string>(maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(nullable: false),
@@ -59,6 +60,19 @@ namespace HTLLBB.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatboxChannels",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Topic = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatboxChannels", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -188,6 +202,64 @@ namespace HTLLBB.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChatboxMessages",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    AuthorId = table.Column<int>(nullable: false),
+                    AuthorId1 = table.Column<string>(nullable: false),
+                    ChannelId = table.Column<int>(nullable: false),
+                    Content = table.Column<string>(nullable: false),
+                    Timestamp = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatboxMessages", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ChatboxMessages_AspNetUsers_AuthorId1",
+                        column: x => x.AuthorId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatboxMessages_ChatboxChannels_ChannelId",
+                        column: x => x.ChannelId,
+                        principalTable: "ChatboxChannels",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Threads",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    AuthorId = table.Column<string>(nullable: false),
+                    Content = table.Column<string>(nullable: false),
+                    CreationTime = table.Column<DateTime>(nullable: false),
+                    ForumId = table.Column<int>(nullable: false),
+                    Title = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Threads", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Threads_AspNetUsers_AuthorId",
+                        column: x => x.AuthorId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Threads_Forums_ForumId",
+                        column: x => x.ForumId,
+                        principalTable: "Forums",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Posts",
                 columns: table => new
                 {
@@ -207,31 +279,10 @@ namespace HTLLBB.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Thread",
-                columns: table => new
-                {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    FirstPostId = table.Column<int>(nullable: false),
-                    ForumId = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Thread", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Thread_Posts_FirstPostId",
-                        column: x => x.FirstPostId,
-                        principalTable: "Posts",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Thread_Forums_ForumId",
-                        column: x => x.ForumId,
-                        principalTable: "Forums",
+                        name: "FK_Posts_Threads_ThreadId",
+                        column: x => x.ThreadId,
+                        principalTable: "Threads",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -274,9 +325,25 @@ namespace HTLLBB.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChatboxMessages_AuthorId1",
+                table: "ChatboxMessages",
+                column: "AuthorId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatboxMessages_ChannelId",
+                table: "ChatboxMessages",
+                column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Forums_CategoryId",
                 table: "Forums",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Forums_Name",
+                table: "Forums",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Posts_AuthorId",
@@ -289,38 +356,24 @@ namespace HTLLBB.Migrations
                 column: "ThreadId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Thread_FirstPostId",
-                table: "Thread",
-                column: "FirstPostId");
+                name: "IX_Threads_AuthorId",
+                table: "Threads",
+                column: "AuthorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Thread_ForumId",
-                table: "Thread",
+                name: "IX_Threads_ForumId",
+                table: "Threads",
                 column: "ForumId");
 
-            migrationBuilder.AddForeignKey(
-                name: "FK_Posts_Thread_ThreadId",
-                table: "Posts",
-                column: "ThreadId",
-                principalTable: "Thread",
-                principalColumn: "ID",
-                onDelete: ReferentialAction.Cascade);
+            migrationBuilder.CreateIndex(
+                name: "IX_Threads_Title",
+                table: "Threads",
+                column: "Title",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Posts_AspNetUsers_AuthorId",
-                table: "Posts");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Forums_Categories_CategoryId",
-                table: "Forums");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Posts_Thread_ThreadId",
-                table: "Posts");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -337,22 +390,28 @@ namespace HTLLBB.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
-                name: "Thread");
+                name: "ChatboxMessages");
 
             migrationBuilder.DropTable(
                 name: "Posts");
 
             migrationBuilder.DropTable(
+                name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "ChatboxChannels");
+
+            migrationBuilder.DropTable(
+                name: "Threads");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
                 name: "Forums");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

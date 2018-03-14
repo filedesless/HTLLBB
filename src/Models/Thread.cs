@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HTLLBB.Models
 {
@@ -13,6 +12,15 @@ namespace HTLLBB.Models
         public int ID { get; set; }
         [Required]
         public String Title { get; set; }
+
+		[Required]
+		public ApplicationUser Author { get; set; }
+		
+        [Required]
+        public String Content { get; set; }
+
+        [Required]
+        public DateTime CreationTime { get; set; }
 
 		public ICollection<Post> Posts { get; set; }
 

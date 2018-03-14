@@ -38,7 +38,7 @@ namespace HTLLBB.Data
         public DbSet<Post> Posts { get; set; }
         public DbSet<Forum> Forums { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Thread> Thread { get; set; }
+        public DbSet<Thread> Threads { get; set; }
         public DbSet<ChatboxChannel> ChatboxChannels { get; set; }
         public DbSet<ChatboxMessage> ChatboxMessages { get; set; }
     }

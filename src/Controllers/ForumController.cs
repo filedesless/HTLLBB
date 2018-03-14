@@ -31,8 +31,7 @@ namespace HTLLBB.Controllers
             Forum forum = await _context.Forums
                                         .Include(f => f.Category)
                                         .Include(f => f.Threads)
-                                            .ThenInclude(t => t.Posts)
-                                            .ThenInclude(p => p.Author)
+    			                            .ThenInclude(t => t.Author)
                                         .SingleOrDefaultAsync(f => f.Name == name);
 
             forum.Threads = forum.Threads.OrderBy(t => t.ID).ToList();
