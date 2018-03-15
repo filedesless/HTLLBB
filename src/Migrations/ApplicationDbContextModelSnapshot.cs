@@ -103,15 +103,29 @@ namespace HTLLBB.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("BlockId");
+
+                    b.Property<string>("Content")
+                        .IsRequired();
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("BlockId");
+
+                    b.ToTable("ChatboxMessages");
+                });
+
+            modelBuilder.Entity("HTLLBB.Models.ChatboxMessageBlock", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd();
+
                     b.Property<int>("AuthorId");
 
                     b.Property<string>("AuthorId1")
                         .IsRequired();
 
                     b.Property<int>("ChannelId");
-
-                    b.Property<string>("Content")
-                        .IsRequired();
 
                     b.Property<DateTime>("Timestamp");
 
@@ -121,7 +135,7 @@ namespace HTLLBB.Migrations
 
                     b.HasIndex("ChannelId");
 
-                    b.ToTable("ChatboxMessages");
+                    b.ToTable("ChatboxMessageBlock");
                 });
 
             modelBuilder.Entity("HTLLBB.Models.Forum", b =>
@@ -307,13 +321,21 @@ namespace HTLLBB.Migrations
 
             modelBuilder.Entity("HTLLBB.Models.ChatboxMessage", b =>
                 {
+                    b.HasOne("HTLLBB.Models.ChatboxMessageBlock", "Block")
+                        .WithMany("Lines")
+                        .HasForeignKey("BlockId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("HTLLBB.Models.ChatboxMessageBlock", b =>
+                {
                     b.HasOne("HTLLBB.Models.ApplicationUser", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId1")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("HTLLBB.Models.ChatboxChannel", "Channel")
-                        .WithMany("Messages")
+                        .WithMany("Blocks")
                         .HasForeignKey("ChannelId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });

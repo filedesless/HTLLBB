@@ -13,6 +13,6 @@ namespace HTLLBB.Models
         public String Topic { get; set; }
 
         [Required]
-        public List<ChatboxMessage> Messages { get; set; }
+        public List<ChatboxMessageBlock> Blocks { get; set; }
     }
 }

@@ -38,7 +38,7 @@ namespace HTLLBB.Data
                 {
                     ID = 1,
                     Topic = "General",
-                    Messages = new List<ChatboxMessage>(),
+                    Blocks = new List<ChatboxMessageBlock>(),
                 });
 
                 ctx.SaveChanges();

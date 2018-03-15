@@ -202,7 +202,7 @@ namespace HTLLBB.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ChatboxMessages",
+                name: "ChatboxMessageBlock",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -210,20 +210,19 @@ namespace HTLLBB.Migrations
                     AuthorId = table.Column<int>(nullable: false),
                     AuthorId1 = table.Column<string>(nullable: false),
                     ChannelId = table.Column<int>(nullable: false),
-                    Content = table.Column<string>(nullable: false),
                     Timestamp = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ChatboxMessages", x => x.ID);
+                    table.PrimaryKey("PK_ChatboxMessageBlock", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_ChatboxMessages_AspNetUsers_AuthorId1",
+                        name: "FK_ChatboxMessageBlock_AspNetUsers_AuthorId1",
                         column: x => x.AuthorId1,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ChatboxMessages_ChatboxChannels_ChannelId",
+                        name: "FK_ChatboxMessageBlock_ChatboxChannels_ChannelId",
                         column: x => x.ChannelId,
                         principalTable: "ChatboxChannels",
                         principalColumn: "ID",
@@ -255,6 +254,26 @@ namespace HTLLBB.Migrations
                         name: "FK_Threads_Forums_ForumId",
                         column: x => x.ForumId,
                         principalTable: "Forums",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatboxMessages",
+                columns: table => new
+                {
+                    ID = table.Column<int>(nullable: false)
+                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    BlockId = table.Column<int>(nullable: false),
+                    Content = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatboxMessages", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_ChatboxMessages_ChatboxMessageBlock_BlockId",
+                        column: x => x.BlockId,
+                        principalTable: "ChatboxMessageBlock",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -325,14 +344,19 @@ namespace HTLLBB.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatboxMessages_AuthorId1",
-                table: "ChatboxMessages",
+                name: "IX_ChatboxMessageBlock_AuthorId1",
+                table: "ChatboxMessageBlock",
                 column: "AuthorId1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ChatboxMessages_ChannelId",
-                table: "ChatboxMessages",
+                name: "IX_ChatboxMessageBlock_ChannelId",
+                table: "ChatboxMessageBlock",
                 column: "ChannelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatboxMessages_BlockId",
+                table: "ChatboxMessages",
+                column: "BlockId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Forums_CategoryId",
@@ -399,10 +423,13 @@ namespace HTLLBB.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ChatboxChannels");
+                name: "ChatboxMessageBlock");
 
             migrationBuilder.DropTable(
                 name: "Threads");
+
+            migrationBuilder.DropTable(
+                name: "ChatboxChannels");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

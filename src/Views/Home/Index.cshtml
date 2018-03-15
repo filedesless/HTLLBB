@@ -9,7 +9,7 @@
 <div class="w3-grey w3-container w3-card-4">
 @if (SignInManager.IsSignedIn(User))
 {
-    <div id="DisplayMessages" style="height: 30em; overflow-y: scroll;" class="w3-dark-grey w3-margin-top">
+    <div id="DisplayMessages" style="height: 34em; overflow-y: scroll; text-align: justify" class="w3-dark-grey w3-margin-top">
 
     </div>
 
@@ -18,7 +18,7 @@
             <input type="text" id="txtMessage" class="w3-input" autofocus=autofocus autocomplete="off" />
         </p>
         <p class="w3-quarter">
-            <input type="button" class="w3-btn" value="Submit" />
+            <input type="submit" class="w3-btn" value="Submit" />
         </p>
     </form>
 } else {
@@ -30,39 +30,11 @@
     <br /><br />
 }
 </div>
+<div id="path" style="display: none;">@Url.Content("~/")</div>
 
 @section Scripts {
 @if (SignInManager.IsSignedIn(User))
 {
-    <script>
-        let connection = new signalR.HubConnection('/chat');
-        let path = `@Url.Content("~/")`;
-
-        connection.on('send', (name, avatar, curTime, message) => {
-            let date = new Date(curTime + " UTC");
-            let month = date.getMonth().toString().padStart(2, "0");
-            let day = date.getDate().toString().padStart(2, "0");
-            let hours = date.getHours().toString().padStart(2, "0");
-            let min = date.getMinutes().toString().padStart(2, "0");
-            let time = `<span class="w3-tiny w3-right w3-bar-item">${month}/${day} ${hours}:${min}</span>`;
-            let usr = `<b>${name}</b>`;
-            let txt = $('<div />').text(message).text();
-            let img = `<img src="${path}${avatar || 'images/no_avatar.jpg'}" class="w3-bar-item" style="width: 55px"></img>`;
-            let div = `<div class="w3-bar">${img}<span class="w3-bar-item" style="padding-left: 0px;">${usr}: ${txt}</span>${time}</div>`;
-            $('#DisplayMessages')
-                .append(div)
-                .scrollTop($('#DisplayMessages').prop('scrollHeight'));
-        });
-
-        connection.start()
-            .then(() => connection.invoke('RetrieveMessages', 1));
-            
-        function SendMessage(){
-            var msg = document.getElementById("txtMessage");
-            connection.invoke('send', msg.value, 1);
-            msg.value = "";
-            return false;
-        }
-    </script>     
+    <script src="~/js/chatbox.js"></script>     
 }
 }

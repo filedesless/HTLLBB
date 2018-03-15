@@ -9,19 +9,11 @@ namespace HTLLBB.Models
         public int ID { get; set; }
 
         [Required]
-        public int ChannelId { get; set; }
+        public int BlockId { get; set; }
         [Required]
-        public ChatboxChannel Channel { get; set; }
-
-        [Required]
-        public int AuthorId { get; set; }
-        [Required]
-        public ApplicationUser Author { get; set; }
+        public ChatboxMessageBlock Block { get; set; }
 
         [Required]
         public string Content { get; set; }
-
-        [Required]
-        public DateTime Timestamp { get; set; }
     }
 }
