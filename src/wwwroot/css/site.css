@@ -39,3 +39,7 @@ input, textarea {
         display: none;
     }
 }
+
+.chatbox_message > * > img {
+    width: 100%;
+}

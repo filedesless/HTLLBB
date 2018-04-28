@@ -9,11 +9,11 @@ class Block {
     userName: String;
     avatarPath: String;
     timeStamp: String;
-    messages: Array<String>;
+    messages: {id: number => msg: String};
+    hasEditRight: Boolean;
 }
 */
 connection.on('send', (blocks) => {
-    console.log(blocks);
     let display = $('#DisplayMessages');
     display.empty();
 
@@ -26,9 +26,17 @@ connection.on('send', (blocks) => {
         let time = `<span class="w3-tiny w3-text-light-grey">${month}/${day} ${hours}:${min}</span>`;
         let usr = `<b class="w3-large">${block.userName}</b>`;
         let txt = '<div>';
-        block.messages.forEach((msg, i) => {
-            txt += `<span style="display: block">${msg}</span>`;
-        });
+        for (let i in block.messages) {
+            let msg = block.messages[i];
+            let x = "", y = "", len = 12;
+            console.log(block.hasEditRight);
+            if (block.hasEditRight) {
+                x = `<span class="w3-col s1 m1 l1" onClick="deleteMessage(${i})"><i class="w3-button w3-right glyphicon glyphicon-remove w3-text-red"></i></span>`;
+                y = `<span class="w3-col s1 m1 l1" onClick="editMessage(${i})"><i class="w3-button w3-right glyphicon glyphicon-edit w3-text-yellow"></i></span>`;
+                len -= 2;
+            }
+            txt += `<div class="w3-row-padding"><span class="w3-col s${len} m${len} l${len} chatbox_message" id="chatbox_message_${i}">${msg}</span>${y}${x}</div>`;
+        }
         txt += '</div>';
         let img = `<img src="${path}${block.avatarPath || 'images/no_avatar.jpg'}" class="w3-col" style="width: 75px; padding-top: 10px;"></img>`;
         let div = `<div class="w3-row-padding w3-padding">${img}<div class="w3-rest" style="padding-left:1em;"><p class="w3-bar-item" style="line-height: 1;">${usr} ${time}</p>${txt}</div></div><hr style='margin: 5px;'/>`;
@@ -46,4 +54,15 @@ function SendMessage(){
     connection.invoke('send', msg.value, 1);
     msg.value = "";
     return false;
+}
+
+function deleteMessage(id) {
+    connection.invoke('DeleteMessage', 1, id);
+}
+
+function editMessage(id) {
+    let newMsg = prompt("Here, you can edit your message: ", $(`#chatbox_message_${id}`).text());
+    if (newMsg != null) {
+        connection.invoke('EditMessage', 1, id, newMsg);
+    }
 }
