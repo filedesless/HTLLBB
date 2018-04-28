@@ -1,7 +1,7 @@
 # HTLLBB
 
 
-Start with `docker-compose up` in the HTLLBB directory, the application will start listening on http://*:5000. It is intended to run behind a reverse proxy like NGINX or IIS.
+Start with `docker-compose up` in the HTLLBB directory, the application will start listening on http://localhost:5000. It is intended to run behind a reverse proxy like NGINX or IIS.
 
 ### Reminder for deployment
 
@@ -18,7 +18,9 @@ Start with `docker-compose up` in the HTLLBB directory, the application will sta
 }
 ```
 
-- Edit the MySQL password in docker-compose.yml and src/appsettings.Production.json
+- Setup MySQL Server
+
+- Edit the MySQL password src/appsettings.Production.json
 
 - Setup NGINX to serve the backend as a reverse proxy
 
@@ -49,6 +51,6 @@ location /chat {
 
 - Install dotnetcore on your platform
 - Use the following environment variable `export ASPNETCORE_ENVIRONMENT=Development` (~/.bashrc on linux, ~/.profile on OSX)
-- Setup a local MySQL and Redis instance, and fill in the required details in src/appsettings.Development.json
+- Setup a local MySQL instance, and fill in the required details in src/appsettings.Development.json
 - Start the project with `dotnet run` in the src directory (or use the default "play" button in visual studio)
 

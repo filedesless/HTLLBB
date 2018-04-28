@@ -6,23 +6,12 @@ services:
     build:
       context: ./src
       dockerfile: Dockerfile
-    depends_on:
-        - mysql
     restart: always
-    ports:
-      - 5000:5000
+    network_mode: "host"
     volumes:
       - ./src/appsettings.Production.json:/app/appsettings.Production.json
+      - ./src/wwwroot/uploads/:/app/wwwroot/uploads/
     environment:
-      ASPNETCORE_URLS: "http://*:5000"
+      ASPNETCORE_URLS: "http://localhost:5000"
       ASPNETCORE_ENVIRONMENT: "Production"
-    command: ["./wait-for-it.sh", "mysql:3306", "-t", "0", "--", "dotnet", "src.dll"]
-
-  mysql:
-    image: mysql
-    restart: always
-    environment:
-        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-        MYSQL_DATABASE: "HTLLBB"
-        MYSQL_USER: "aspnet"
-        MYSQL_PASSWORD: "aspnet"
+    command: ["dotnet", "src.dll"]
